@@ -9,9 +9,10 @@ import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
-import com.wx.jsync.filesystem.impl.GDriveFileSystem;
-import com.wx.jsync.filesystem.impl.LocalFileSystem;
-import com.wx.jsync.index.RemoteConfig;
+import com.wx.jsync.filesystem.base.GDriveFileSystem;
+import com.wx.jsync.filesystem.base.LocalFileSystem;
+import com.wx.jsync.index.options.NamedOptions;
+import com.wx.jsync.index.options.Options;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.jsync.util.extensions.google.DriveServiceHelper;
 import com.wx.jsync.util.extensions.google.GDriveUtils;
@@ -24,26 +25,32 @@ import java.util.logging.Logger;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.dataset.DataSetType.GDRIVE;
+import static com.wx.jsync.index.IndexKey.REMOTE;
 
 public class GDriveDataSetFactory extends DataSetFactory {
 
     private static final Logger LOG = LogHelper.getLogger(GDriveDataSetFactory.class);
     private static final String GOOGLE_DIR = CONFIG_DIR + "google/";
 
+    private static final String KEY_DIRECTORY = "directory";
+    private static final String KEY_USER = "user";
+    private static final String KEY_ROOT_ID = "rootId";
+
+
     @Override
-    public RemoteConfig parseConfig(ArgumentsSupplier args) {
-        return new RemoteConfig(GDRIVE, ImmutableMap.of(
-                "directory", args.supplyString()
+    public Options parseConfig(ArgumentsSupplier args) {
+        return new Options(ImmutableMap.of(
+                KEY_DIRECTORY, args.supplyString()
         ));
     }
 
     @Override
-    protected FileSystem initFileSystem(DataSet local, RemoteConfig config) throws IOException {
+    protected FileSystem initFileSystem(DataSet local, Options options) throws IOException {
         initDriveService(local);
 
-        String user = config.getOption("user");
-        String rootId = config.getOption("rootId");
-        String directory = config.getOption("directory");
+        String user = options.get(KEY_USER);
+        String rootId = options.get(KEY_ROOT_ID);
+        String directory = options.get(KEY_DIRECTORY);
 
         Drive driveService;
         boolean saveConfig = false;
@@ -71,12 +78,13 @@ public class GDriveDataSetFactory extends DataSetFactory {
         }
 
         if (saveConfig) {
-            RemoteConfig remoteConfig = new RemoteConfig(GDRIVE, ImmutableMap.of(
-                    "directory", directory,
-                    "user", user,
-                    "rootId", rootId
-            ));
-            local.getIndex().setRemote(remoteConfig);
+            NamedOptions<DataSetType> remoteConfig = new NamedOptions<>(GDRIVE, new Options(ImmutableMap.of(
+                    KEY_DIRECTORY, directory,
+                    KEY_USER, user,
+                    KEY_ROOT_ID, rootId
+            )));
+
+            local.getIndex().set(REMOTE, remoteConfig);
             local.getIndex().save(local.getFileSystem());
         }
 
@@ -93,7 +101,7 @@ public class GDriveDataSetFactory extends DataSetFactory {
 
             DriveServiceFactory.init(localFs.getFile(GOOGLE_DIR));
         } catch (ClassCastException e) {
-            throw new IllegalArgumentException("GDrive data set can only be combined with a standard local filesystem");
+            throw new IllegalArgumentException("GDrive data setValue can only be combined with a standard local filesystem");
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
         }

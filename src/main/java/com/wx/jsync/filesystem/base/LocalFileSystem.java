@@ -1,4 +1,4 @@
-package com.wx.jsync.filesystem.impl;
+package com.wx.jsync.filesystem.base;
 
 import com.wx.io.Accessor;
 import com.wx.io.file.FileUtil;
@@ -97,7 +97,7 @@ public class LocalFileSystem implements FileSystem {
         return new File(directory, filename);
     }
 
-    private String relative(File file) {
+    public String relative(File file) {
         return directory.toURI().relativize(file.toURI()).getPath();
     }
 

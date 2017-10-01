@@ -1,7 +1,10 @@
-package com.wx.jsync.filesystem;
+package com.wx.jsync.filesystem.decorator.impl;
 
 import com.wx.crypto.Crypter;
 import com.wx.crypto.CryptoException;
+import com.wx.jsync.filesystem.FileStat;
+import com.wx.jsync.filesystem.FileSystem;
+import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,21 +18,19 @@ import static com.wx.jsync.Constants.INDEX_FILE;
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 24.09.17.
  */
-public class CrypterFileSystem implements FileSystem {
+public class CrypterFileSystem implements DecoratorFileSystem {
 
     private final FileSystem fs;
-    private Crypter crypter;
+    private final Crypter crypter;
 
-    public CrypterFileSystem(FileSystem fs) {
+    public CrypterFileSystem(FileSystem fs, Crypter crypter) {
         this.fs = fs;
-    }
-
-    public FileSystem getBaseFs() {
-        return fs;
-    }
-
-    public void setCrypter(Crypter crypter) {
         this.crypter = crypter;
+    }
+
+    @Override
+    public <E extends FileSystem> E getBaseFs() {
+        return (E) fs;
     }
 
     @Override
@@ -105,6 +106,6 @@ public class CrypterFileSystem implements FileSystem {
     }
 
     private boolean useEncryption(String path) {
-        return crypter != null && !path.equals(INDEX_FILE);
+        return !path.equals(INDEX_FILE);
     }
 }

@@ -81,7 +81,7 @@ public class SyncTasks {
             SyncTask oldValue = tasks.put(path, new SyncTask(type, localFile, remoteFile));
 
             if (oldValue != null) {
-                throw new IllegalArgumentException("A task was already set for " + path);
+                throw new IllegalArgumentException("A task was already setValue for " + path);
             }
         }
 

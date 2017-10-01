@@ -4,12 +4,15 @@ import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.util.log.LogHelper;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import static com.wx.jsync.index.IndexKey.FILES;
+import static com.wx.jsync.index.IndexKey.IGNORE;
 import static com.wx.jsync.sync.tasks.SyncTask.Type.CONFLICT;
 
 public class SyncTasksAnalyzer {
@@ -26,8 +29,10 @@ public class SyncTasksAnalyzer {
         SyncTasks.Builder builder = new SyncTasks.Builder(enableBump);
 
         Set<String> visitedFiles = new HashSet<>();
-        for (SyncFile localFile : local.getIndex().getAllFiles()) {
-            Optional<SyncFile> remoteFile = remote.getIndex().getFile(localFile.getPath());
+
+        Collection<SyncFile> localFiles = local.getIndex().get(FILES);
+        for (SyncFile localFile : localFiles) {
+            Optional<SyncFile> remoteFile = remote.getIndex().getSingle(FILES, localFile.getPath());
 
             visitedFiles.add(localFile.getPath());
 
@@ -35,8 +40,10 @@ public class SyncTasksAnalyzer {
         }
 
 
-        Predicate<String> localFilter = local.getIndex().getFileFilter();
-        for (SyncFile remoteFile : remote.getIndex().getAllFiles()) {
+        Predicate<String> localFilter = local.getIndex().get(IGNORE);
+
+        Collection<SyncFile> remoteFiles = remote.getIndex().get(FILES);
+        for (SyncFile remoteFile : remoteFiles) {
             if (!visitedFiles.contains(remoteFile.getPath()) && localFilter.test(remoteFile.getPath())) {
                 builder.updateLocal(Optional.empty(), remoteFile);
             }

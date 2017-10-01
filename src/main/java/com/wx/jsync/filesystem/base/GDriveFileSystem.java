@@ -1,4 +1,4 @@
-package com.wx.jsync.filesystem.impl;
+package com.wx.jsync.filesystem.base;
 
 import com.google.api.services.drive.model.File;
 import com.wx.jsync.filesystem.FileStat;

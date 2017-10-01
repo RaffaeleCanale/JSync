@@ -1,6 +1,7 @@
 package com.wx.jsync.sync;
 
 import com.wx.jsync.dataset.DataSet;
+import com.wx.jsync.index.IndexKey;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import com.wx.jsync.sync.tasks.SyncTask;
 import com.wx.jsync.sync.tasks.SyncTasks;
@@ -14,6 +15,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static com.google.common.collect.Sets.union;
+import static com.wx.jsync.index.IndexKey.OWNER;
+import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
 public class SyncManager {
 
@@ -53,7 +56,13 @@ public class SyncManager {
         return getStatus0().create();
     }
 
+    public DataSet getLocal() {
+        return local;
+    }
 
+    public DataSet getRemote() {
+        return remote;
+    }
 
     public void execute() throws IOException {
         SyncTasks.Builder tasksBuilder = getStatus0();
@@ -76,10 +85,10 @@ public class SyncManager {
 
     private void updateRemote() {
         Set<String> participants = union(
-                Collections.singleton(local.getIndex().getOwnerName()),
-                remote.getIndex().getParticipants()
+                Collections.singleton(local.getIndex().get(OWNER)),
+                remote.getIndex().get(PARTICIPANTS)
         );
-        remote.getIndex().setParticipants(participants);
+        remote.getIndex().set(PARTICIPANTS, participants);
 
     }
 

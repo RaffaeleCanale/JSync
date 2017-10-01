@@ -1,9 +1,9 @@
 package com.wx.jsync.dataset;
 
-import com.wx.crypto.Crypter;
-import com.wx.jsync.filesystem.CrypterFileSystem;
 import com.wx.jsync.filesystem.FileStat;
 import com.wx.jsync.filesystem.FileSystem;
+import com.wx.jsync.filesystem.MultiFileSystem;
+import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 import com.wx.jsync.index.Index;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.sync.diff.FsDiff;
@@ -15,23 +15,27 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
+import static com.wx.jsync.index.IndexKey.FILES;
+import static com.wx.jsync.index.IndexKey.IGNORE;
+import static com.wx.jsync.index.IndexKey.OWNER;
 import static com.wx.jsync.util.Common.bumpVersion;
 
 public class DataSet {
 
     private static final Logger LOG = LogHelper.getLogger(DataSet.class);
 
-    private final CrypterFileSystem fileSystem;
+    private final MultiFileSystem fileSystem;
     private final Index index;
 
     public DataSet(FileSystem fileSystem, Index index) {
-        this.fileSystem = new CrypterFileSystem(fileSystem);
+        this.fileSystem = new MultiFileSystem(fileSystem);
         this.index = index;
     }
 
@@ -47,21 +51,23 @@ public class DataSet {
         return (E) this.fileSystem.getBaseFs();
     }
 
-    public void setCrypter(Crypter crypter) {
-        fileSystem.setCrypter(crypter);
+    public DataSet addDecorator(String path, Function<FileSystem, DecoratorFileSystem> factory) {
+        fileSystem.addDecorator(path, factory);
+
+        return this;
     }
 
     public Collection<String> getAllFileSystemFiles() throws IOException {
         return fileSystem.getAllFiles().stream()
                 .filter(file -> !file.startsWith(CONFIG_DIR))
-                .filter(index.getFileFilter())
+                .filter(index.get(IGNORE))
                 .collect(Collectors.toList());
     }
 
     public FsDiff computeDiff() throws IOException {
         FsDiff.Builder diffBuilder = new FsDiff.Builder();
 
-        Collection<SyncFile> indexFiles = index.getAllFiles();
+        Collection<SyncFile> indexFiles = index.get(FILES);
         Set<String> fsFiles = new HashSet<>(getAllFileSystemFiles());
 
 
@@ -107,11 +113,11 @@ public class DataSet {
 
                 case CHANGED:
                     // Bump version
-                    index.setFile(new SyncFile(
+                    index.setSingle(FILES, new SyncFile(
                             path,
                             diffFile.getFsStat(),
                             bumpVersion(diffFile.getIndexFile().getVersion()),
-                            index.getOwnerName(),
+                            index.get(OWNER),
                             diffFile.getIndexFile().getBaseVersion()
                     ));
                     changed++;
@@ -119,11 +125,11 @@ public class DataSet {
 
                 case ADDED:
                     //  Add fresh
-                    index.setFile(new SyncFile(
+                    index.setSingle(FILES, new SyncFile(
                             path,
                             diffFile.getFsStat(),
                             VERSION_INCREMENT_DELTA,
-                            index.getOwnerName(),
+                            index.get(OWNER),
                             Optional.empty()
                     ));
                     added++;
@@ -131,11 +137,11 @@ public class DataSet {
 
                 case REMOVED:
                     // Set 'removed' + bumpVersion version
-                    index.setFile(new SyncFile(
+                    index.setSingle(FILES, new SyncFile(
                             path,
                             FileStat.REMOVED,
                             bumpVersion(diffFile.getIndexFile().getVersion()),
-                            index.getOwnerName(),
+                            index.get(OWNER),
                             diffFile.getIndexFile().getBaseVersion()
                     ));
                     removed++;
@@ -148,7 +154,8 @@ public class DataSet {
 
         int sum = added + removed + changed;
         if (sum > 0) {
-            LOG.log(Level.INFO, "Commit {0} change(s) to {1} ({2} changed, {3} added, {4} removed)", new Object[]{sum, index.getOwnerName(), changed, added, removed});
+            LOG.log(Level.INFO, "Commit {0} change(s) to {1} ({2} changed, {3} added, {4} removed)",
+                    new Object[]{sum, index.get(OWNER), changed, added, removed});
         }
 
         return sum > 0;

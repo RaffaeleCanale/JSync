@@ -36,6 +36,9 @@ public class JsonUtils {
     }
 
     public static Optional<JSONObject> getObjectOpt(JSONObject object, String... path) {
+        if (path.length == 0) {
+            return Optional.of(object);
+        }
         return get(object, JSONObject::getJSONObject, path);
     }
 
@@ -56,18 +59,29 @@ public class JsonUtils {
     }
 
     public static Optional<List<String>> getStringListOpt(JSONObject object, String... path) {
-        return getArray(object, path).map(array -> populate(array::getString, array.length()));
+        return getArrayOpt(object, path).map(array -> populate(array::getString, array.length()));
     }
+
+//    public static Optional<List<JSONObject>> getObjectsListOpt(JSONObject object, String... path) {
+//        return getArrayOpt(object, path).map(array -> {
+//            List<JSONObject> result = new ArrayList<>(array.length());
+//            for (int i = 0; i < array.length(); i++) {
+//                result.add(array.getJSONObject(i));
+//            }
+//
+//            return result;
+//        });
+//    }
 
     public static void remove(JSONObject object, String... path) {
         getParent(object, path).ifPresent(parent -> parent.remove(field(path)));
     }
 
-    private static Optional<JSONArray> getArray(JSONObject object, String... path) {
+    public static Optional<JSONArray> getArrayOpt(JSONObject object, String... path) {
         return get(object, JSONObject::getJSONArray, path);
     }
 
-    public static void  set(JSONObject object, Collection<?> value, String... path) {
+    public static void set(JSONObject object, Collection<?> value, String... path) {
         set(object, new JSONArray(value), path);
     }
 

@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.wx.jsync.index.IndexKey.FILES;
+
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 23.09.17.
@@ -56,7 +58,7 @@ public abstract class SyncTasksExecutor {
                 pull(localFs, remoteFs, path);
 
                 FileStat localStat = localFs.getFileStat(path);
-                localIndex.setFile(new SyncFile(
+                localIndex.setSingle(FILES, new SyncFile(
                         path,
                         localStat,
                         remoteFile.getVersion(),
@@ -70,21 +72,21 @@ public abstract class SyncTasksExecutor {
                 push(localFs, remoteFs, path);
 
                 FileStat remoteStat = remoteFs.getFileStat(path);
-                remoteIndex.setFile(new SyncFile(
+                remoteIndex.setSingle(FILES, new SyncFile(
                         path,
                         remoteStat,
                         localFile.getVersion(),
                         localFile.getVersionAuthor(),
                         Optional.empty()
                 ));
-                localIndex.setFile(localFile.bumpBaseVersion());
+                localIndex.setSingle(FILES, localFile.bumpBaseVersion());
                 break;
 
             case REMOVE_LOCAL:
                 LOG.finest("Removing " + path + "...");
                 removeLocal(localFs, path);
 
-                localIndex.setFile(new SyncFile(
+                localIndex.setSingle(FILES, new SyncFile(
                         path,
                         FileStat.REMOVED,
                         remoteFile.getVersion(),
@@ -97,32 +99,32 @@ public abstract class SyncTasksExecutor {
                 LOG.finest("Removing " + path + "...");
                 removeRemote(remoteFs, path);
 
-                remoteIndex.setFile(new SyncFile(
+                remoteIndex.setSingle(FILES, new SyncFile(
                         path,
                         FileStat.REMOVED,
                         localFile.getVersion(),
                         localFile.getVersionAuthor(),
                         Optional.empty()
                 ));
-                localIndex.setFile(localFile.bumpBaseVersion());
+                localIndex.setSingle(FILES, localFile.bumpBaseVersion());
                 break;
 
             case SOFT_PULL:
                 LOG.finest("Bumping " + localFile.getPath());
-                localIndex.setFile(localFile
+                localIndex.setSingle(FILES, localFile
                         .withSameVersionAs(remoteFile)
                         .bumpBaseVersion());
                 break;
 
             case SOFT_PUSH:
                 LOG.finest("Bumping " + localFile.getPath());
-                remoteIndex.setFile(remoteFile.withSameVersionAs(localFile));
-                localIndex.setFile(localFile.bumpBaseVersion());
+                remoteIndex.setSingle(FILES, remoteFile.withSameVersionAs(localFile));
+                localIndex.setSingle(FILES, localFile.bumpBaseVersion());
                 break;
 
             case DELETE_LOCAL_ENTRY:
                 LOG.warning("Removing local index entry that failed to purge for " + path);
-                localIndex.removeFile(localFile);
+                localIndex.removeSingle(FILES, localFile);
                 break;
 
             default:

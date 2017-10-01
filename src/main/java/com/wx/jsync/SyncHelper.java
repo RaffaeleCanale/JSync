@@ -1,19 +1,21 @@
 package com.wx.jsync;
 
-import com.wx.crypto.Crypter;
-import com.wx.crypto.CryptoException;
 import com.wx.jsync.dataset.DataSet;
+import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.impl.LocalDataSetFactory;
-import com.wx.jsync.index.RemoteConfig;
+import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
+import com.wx.jsync.index.Index;
+import com.wx.jsync.index.options.NamedOptions;
+import com.wx.jsync.index.options.Options;
 import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.sync.tasks.SyncTasksExecutor;
-import com.wx.jsync.sync.tasks.impl.BackupExecutor;
+import com.wx.jsync.sync.tasks.impl.ConfirmExecutor;
 import com.wx.jsync.sync.tasks.impl.DefaultExecutor;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Set;
 
+import static com.wx.jsync.index.IndexKey.*;
 import static com.wx.jsync.util.DesktopUtils.getCwd;
 
 /**
@@ -25,54 +27,57 @@ public class SyncHelper {
     public static SyncManager initSyncManager() throws IOException {
         /*
 
-        - load local index
-        - load remote index
+        - loadOpt local index
+        - loadOpt remote index
 
-        - init base executor (crypter)
-        - init remote backup executor
+        - init base executor
+        - int local decorators
+        - int remote decorators
+
         - init sync manager
 
          */
         DataSet local = new LocalDataSetFactory().loadFrom(getCwd());
         DataSet remote = connectRemote(local);
 
-        initCrypter(local, remote);
-
-        SyncTasksExecutor baseExecutor = initRemoteBackup(remote, new DefaultExecutor());
-
+        initDecorators(local, local.getIndex());
+        initDecorators(remote, local.getIndex());
 
         SyncManager syncManager = new SyncManager(local, remote);
-        local.getIndex().initialize(syncManager, baseExecutor);
+        syncManager.setEnableBump(local.getIndex().get(ENABLE_BUMP));
+        syncManager.setConflictHandler(local.getIndex().get(CONFLICT_HANDLER));
+        syncManager.setTasksExecutor(getExecutor(local.getIndex()));
 
         return syncManager;
     }
 
+    private static SyncTasksExecutor getExecutor(Index localIndex) {
+        SyncTasksExecutor executor = new DefaultExecutor();
+
+        if (localIndex.get(ASK_CONFIRMATION)) {
+            executor = new ConfirmExecutor(executor);
+        }
+
+        return executor;
+    }
+
     private static DataSet connectRemote(DataSet local) throws IOException {
-        RemoteConfig remoteConfig = local.getIndex().getRemote().orElseThrow(() -> new NoSuchElementException("This data set has no remote configured"));
-        return remoteConfig.getType().getFactory().connectOrInit(local, remoteConfig);
+        NamedOptions<DataSetType> remoteConfig = local.getIndex().get(REMOTE);
+        return remoteConfig.getType().getFactory().connectOrInit(local, remoteConfig.getOptions());
     }
 
-    private static void initCrypter(DataSet local, DataSet remote) throws IOException {
-        Optional<Crypter> crypter = remote.getIndex().getCrypter();
+    private static void initDecorators(DataSet target, Index localIndex) throws IOException {
+        Set<NamedOptions<DecoratorType>> decorators = target.getIndex().get(DECORATORS);
 
-        if (crypter.isPresent()) {
-            try {
-                local.getIndex().generateKey(crypter.get());
+        for (NamedOptions<DecoratorType> decorator : decorators) {
+            Options options = decorator.getOptions();
 
-                remote.setCrypter(crypter.get());
-            } catch (CryptoException e) {
-                throw new IOException(e);
-            }
+
+            decorator.getType().getFactory().getFactory(localIndex, options)
+                    .apply(target::addDecorator);
         }
     }
 
-    private static SyncTasksExecutor initRemoteBackup(DataSet remote, SyncTasksExecutor baseExecutor) {
-        if (remote.getIndex().useBackup()) {
-            return new BackupExecutor(false, true, baseExecutor);
-        }
-
-        return baseExecutor;
-    }
 
     private SyncHelper() {
     }
