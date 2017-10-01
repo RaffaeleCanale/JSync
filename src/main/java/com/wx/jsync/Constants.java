@@ -7,6 +7,9 @@ public class Constants {
     public static final double VERSION_INCREMENT_DELTA = 0.1;
     public static final String APPLICATION_NAME = "JSync";
 
+    public static final String GOOGLE_DIR = CONFIG_DIR + "google/";
+    public static final String GOOGLE_DIR_GLOBAL = System.getProperty("user.home") + "/.jsync/" + "google/";
+
 
     public static final boolean DEFAULT_ENABLE_BUMP = true;
     public static final boolean DEFAULT_USE_BACKUP = false;

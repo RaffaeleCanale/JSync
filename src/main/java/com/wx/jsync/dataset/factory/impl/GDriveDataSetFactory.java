@@ -24,13 +24,14 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
+import static com.wx.jsync.Constants.GOOGLE_DIR;
+import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.dataset.DataSetType.GDRIVE;
 import static com.wx.jsync.index.IndexKey.REMOTE;
 
 public class GDriveDataSetFactory extends DataSetFactory {
 
     private static final Logger LOG = LogHelper.getLogger(GDriveDataSetFactory.class);
-    private static final String GOOGLE_DIR = CONFIG_DIR + "google/";
 
     private static final String KEY_DIRECTORY = "directory";
     private static final String KEY_USER = "user";
@@ -98,8 +99,15 @@ public class GDriveDataSetFactory extends DataSetFactory {
 
         try {
             LocalFileSystem localFs = local.getBaseFs();
+            java.io.File localDir = localFs.getFile(GOOGLE_DIR);
+            java.io.File globalDir = new java.io.File(GOOGLE_DIR_GLOBAL);
 
-            DriveServiceFactory.init(localFs.getFile(GOOGLE_DIR));
+            if (!localDir.isDirectory() && globalDir.isDirectory()) {
+                DriveServiceFactory.init(globalDir);
+            } else {
+                DriveServiceFactory.init(localDir);
+            }
+
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("GDrive data setValue can only be combined with a standard local filesystem");
         } catch (GeneralSecurityException e) {

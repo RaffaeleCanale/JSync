@@ -16,12 +16,17 @@ import com.wx.jsync.dataset.factory.impl.LocalDataSetFactory;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.util.StringArgsSupplier;
+import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.util.log.LogHelper;
 import com.wx.util.representables.string.EnumCasterLC;
 
+import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.sql.DriverManager;
 import java.util.logging.Level;
 
+import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.SyncHelper.initSyncManager;
 import static com.wx.jsync.filesystem.decorator.factory.DecoratorFactory.KEY_PATH;
 import static com.wx.jsync.index.IndexKey.DECORATORS;
@@ -54,6 +59,12 @@ public class Main {
                 break;
             case "decorate":
                 addDecorator(args);
+                break;
+            case "status":
+                System.out.println(initSyncManager().getStatus());
+                break;
+            case "set-global-gdrive":
+                setGlobalDrive(args);
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -130,4 +141,13 @@ public class Main {
     }
 
 
+    public static void setGlobalDrive(ArgumentsSupplier args) throws IOException {
+        File dir = new File(GOOGLE_DIR_GLOBAL);
+
+        try {
+            DriveServiceFactory.init(dir);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
+        }
+    }
 }
