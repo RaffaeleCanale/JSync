@@ -8,7 +8,6 @@ import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
 
@@ -49,14 +48,6 @@ public class Common {
                 Optional.of(list.get(0));
     }
 
-
-    public static Predicate<String> ignoreFilter(List<String> ignoreList) {
-        return file -> ignoreList.stream().noneMatch(file::matches);
-    }
-
-    public static <E> Predicate<E> alwaysTrue() {
-        return file -> true;
-    }
 
 
     private Common() {

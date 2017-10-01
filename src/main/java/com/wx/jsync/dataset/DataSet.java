@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
 import static com.wx.jsync.index.IndexKey.FILES;
-import static com.wx.jsync.index.IndexKey.IGNORE;
+import static com.wx.jsync.index.IndexKey.FILE_FILTER;
 import static com.wx.jsync.index.IndexKey.OWNER;
 import static com.wx.jsync.util.Common.bumpVersion;
 
@@ -60,7 +60,7 @@ public class DataSet {
     public Collection<String> getAllFileSystemFiles() throws IOException {
         return fileSystem.getAllFiles().stream()
                 .filter(file -> !file.startsWith(CONFIG_DIR))
-                .filter(index.get(IGNORE))
+                .filter(index.get(FILE_FILTER))
                 .collect(Collectors.toList());
     }
 

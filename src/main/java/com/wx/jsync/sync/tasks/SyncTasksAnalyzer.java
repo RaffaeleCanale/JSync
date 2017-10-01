@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import static com.wx.jsync.index.IndexKey.FILES;
-import static com.wx.jsync.index.IndexKey.IGNORE;
+import static com.wx.jsync.index.IndexKey.FILE_FILTER;
 import static com.wx.jsync.sync.tasks.SyncTask.Type.CONFLICT;
 
 public class SyncTasksAnalyzer {
@@ -40,7 +40,7 @@ public class SyncTasksAnalyzer {
         }
 
 
-        Predicate<String> localFilter = local.getIndex().get(IGNORE);
+        Predicate<String> localFilter = local.getIndex().get(FILE_FILTER);
 
         Collection<SyncFile> remoteFiles = remote.getIndex().get(FILES);
         for (SyncFile remoteFile : remoteFiles) {

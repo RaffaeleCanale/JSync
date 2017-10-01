@@ -1,20 +1,16 @@
 package com.wx.jsync;
 
-import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.console.UserConsoleInterface;
 import com.wx.console.system.UnixSystemConsole;
-import com.wx.crypto.cipher.AESCrypter;
 import com.wx.jsync.dataset.DataSet;
-import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
-import com.wx.jsync.filesystem.base.LocalFileSystem;
-import com.wx.jsync.index.Index;
-import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.dataset.factory.impl.LocalDataSetFactory;
+import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
+import com.wx.jsync.index.Index;
+import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
-import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.util.StringArgsSupplier;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.util.log.LogHelper;
@@ -23,12 +19,10 @@ import com.wx.util.representables.string.EnumCasterLC;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.sql.DriverManager;
 import java.util.logging.Level;
 
 import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.SyncHelper.initSyncManager;
-import static com.wx.jsync.filesystem.decorator.factory.DecoratorFactory.KEY_PATH;
 import static com.wx.jsync.index.IndexKey.DECORATORS;
 import static com.wx.jsync.util.DesktopUtils.getCwd;
 

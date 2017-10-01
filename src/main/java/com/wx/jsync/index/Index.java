@@ -38,7 +38,7 @@ public class Index {
 
             // Remove ignored files
             Collection<SyncFile> files = get(FILES);
-            Predicate<String> fileFilter = get(IGNORE);
+            Predicate<String> fileFilter = get(FILE_FILTER);
             for (SyncFile file : files) {
                 if (!fileFilter.test(file.getPath())) {
                     removeSingle(FILES, file);
