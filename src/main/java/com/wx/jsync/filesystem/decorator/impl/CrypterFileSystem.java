@@ -18,36 +18,19 @@ import static com.wx.jsync.Constants.INDEX_FILE;
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 24.09.17.
  */
-public class CrypterFileSystem implements DecoratorFileSystem {
+public class CrypterFileSystem extends AbstractRenameDecorator {
 
-    private final FileSystem fs;
     private final Crypter crypter;
 
     public CrypterFileSystem(FileSystem fs, Crypter crypter) {
-        this.fs = fs;
+        super(fs);
         this.crypter = crypter;
     }
 
-    @Override
-    public <E extends FileSystem> E getBaseFs() {
-        return (E) fs;
-    }
-
-    @Override
-    public FileStat getFileStat(String filename) throws IOException {
-        return fs.getFileStat(realPath(filename));
-    }
-
-    @Override
-    public Collection<String> getAllFiles() throws IOException {
-        return fs.getAllFiles().stream()
-                .map(this::userPath)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public InputStream read(String filename) throws IOException {
-        InputStream in = fs.read(realPath(filename));
+        InputStream in = super.read(filename);
 
         if (useEncryption(filename)) {
             try {
@@ -71,25 +54,10 @@ public class CrypterFileSystem implements DecoratorFileSystem {
             }
         }
 
-        fs.write(realPath(filename), input);
+        super.write(filename, input);
     }
 
-    @Override
-    public void remove(String filename) throws IOException {
-        fs.remove(realPath(filename));
-    }
-
-    @Override
-    public void move(String filename, String destination) throws IOException {
-        fs.move(realPath(filename), realPath(destination));
-    }
-
-    @Override
-    public boolean exists(String filename) throws IOException {
-        return fs.exists(realPath(filename));
-    }
-
-    private String realPath(String userPath) {
+    protected String realPath(String userPath) {
         if (useEncryption(userPath)) {
             return userPath + ENCRYPTED_EXTENSION;
         }
@@ -97,7 +65,7 @@ public class CrypterFileSystem implements DecoratorFileSystem {
         return userPath;
     }
 
-    private String userPath(String realPath) {
+    protected String userPath(String realPath) {
         if (useEncryption(realPath)) {
             return realPath.substring(0, realPath.length() - ENCRYPTED_EXTENSION.length());
         }

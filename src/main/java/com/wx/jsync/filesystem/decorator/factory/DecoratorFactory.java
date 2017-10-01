@@ -1,5 +1,6 @@
 package com.wx.jsync.filesystem.decorator.factory;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 import com.wx.jsync.index.Index;
@@ -44,4 +45,6 @@ public abstract class DecoratorFactory {
     }
 
     protected abstract Function<FileSystem, DecoratorFileSystem> initDecorator(Index localIndex, String path, Options options) throws IOException;
+
+    public abstract Options getOptions(ArgumentsSupplier args);
 }

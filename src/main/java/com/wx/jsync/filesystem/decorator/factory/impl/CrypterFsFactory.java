@@ -1,5 +1,7 @@
 package com.wx.jsync.filesystem.decorator.factory.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.crypto.Crypter;
 import com.wx.crypto.CryptoException;
 import com.wx.crypto.CryptoUtil;
@@ -51,6 +53,13 @@ public class CrypterFsFactory extends DecoratorFactory {
         } catch (CryptoException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public Options getOptions(ArgumentsSupplier args) {
+        return new Options(ImmutableMap.of(
+                KEY_ALGORITHM, args.supplyString()
+        ));
     }
 
     private Crypter getCrypter(Options options) throws IOException {

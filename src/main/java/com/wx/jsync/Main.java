@@ -17,6 +17,7 @@ import com.wx.jsync.index.options.Options;
 import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.util.StringArgsSupplier;
 import com.wx.util.log.LogHelper;
+import com.wx.util.representables.string.EnumCasterLC;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -48,11 +49,37 @@ public class Main {
             case "sync":
                 sync();
                 break;
+            case "decorate":
+                addDecorator(args);
+                break;
             case "encrypt":
                 encrypt(args);
                 break;
-            case "test":
-                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    private static void addDecorator(ArgumentsSupplier args) throws IOException {
+        DataSet target = getTarget(args.supplyString());
+        DecoratorType type = new EnumCasterLC<>(DecoratorType.class).castOut(args.supplyString());
+        Options options = type.getFactory().getOptions(args);
+
+
+        NamedOptions<DecoratorType> decorator = new NamedOptions<>(type, options);
+
+        Index index = target.getIndex();
+        index.setSingle(DECORATORS, decorator);
+        index.save(target.getFileSystem());
+    }
+
+    private static DataSet getTarget(String targetName) throws IOException {
+        if (targetName.equals("local")) {
+            return new LocalDataSetFactory().loadFrom(getCwd());
+        } else if (targetName.equals("remote")) {
+            return SyncHelper.initSyncManager().getRemote();
+        } else {
+            throw new IllegalArgumentException("Invalid target: " + targetName);
         }
     }
 
