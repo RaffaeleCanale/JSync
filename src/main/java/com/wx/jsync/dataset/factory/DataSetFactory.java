@@ -14,12 +14,25 @@ import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
 public abstract class DataSetFactory {
 
-    public final DataSet connectOrInit(DataSet local, Options options) throws IOException {
+    public final DataSet connect(DataSet local, Options options) throws IOException {
         FileSystem remoteFs = initFileSystem(local, options);
         Index remoteIndex = new Index();
 
         if (remoteFs.exists(INDEX_FILE)) {
             remoteIndex.load(remoteFs);
+        } else {
+            throw new IOException("Remote not found");
+        }
+
+        return new DataSet(remoteFs, remoteIndex);
+    }
+
+    public final DataSet init(DataSet local, Options options) throws IOException {
+        FileSystem remoteFs = initFileSystem(local, options);
+        Index remoteIndex = new Index();
+
+        if (remoteFs.exists(INDEX_FILE)) {
+            throw new IOException("Remote already exists");
         } else {
             // TODO: 24.09.17 Better name?
             String author = "remote";

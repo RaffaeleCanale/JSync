@@ -44,16 +44,16 @@ public class Main {
                 init(args);
                 break;
             case "remote":
-                setRemote(args);
+                setRemote(args, false);
+                break;
+            case "remote-init":
+                setRemote(args, true);
                 break;
             case "sync":
                 sync();
                 break;
             case "decorate":
                 addDecorator(args);
-                break;
-            case "encrypt":
-                encrypt(args);
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -83,25 +83,25 @@ public class Main {
         }
     }
 
-    public static void encrypt(ArgumentsSupplier args) throws IOException {
-        String algorithm = args.hasMore() ? args.supplyString() : new AESCrypter().getAlgorithmName();
-
-        SyncManager sync = initSyncManager();
-        LocalFileSystem fs = sync.getLocal().getBaseFs();
-
-        String currentPath = fs.relative(getCwd());
-        NamedOptions<DecoratorType> decoratorOptions = new NamedOptions<>(
-                DecoratorType.CRYPTER,
-                new Options(ImmutableMap.of(
-                        "algorithm", algorithm,
-                        KEY_PATH, currentPath
-                ))
-        );
-
-        Index remoteIndex = sync.getRemote().getIndex();
-        remoteIndex.setSingle(DECORATORS, decoratorOptions);
-        remoteIndex.save(sync.getRemote().getFileSystem());
-    }
+//    public static void encrypt(ArgumentsSupplier args) throws IOException {
+//        String algorithm = args.hasMore() ? args.supplyString() : new AESCrypter().getAlgorithmName();
+//
+//        SyncManager sync = initSyncManager();
+//        LocalFileSystem fs = sync.getLocal().getBaseFs();
+//
+//        String currentPath = fs.relative(getCwd());
+//        NamedOptions<DecoratorType> decoratorOptions = new NamedOptions<>(
+//                DecoratorType.CRYPTER,
+//                new Options(ImmutableMap.of(
+//                        "algorithm", algorithm,
+//                        KEY_PATH, currentPath
+//                ))
+//        );
+//
+//        Index remoteIndex = sync.getRemote().getIndex();
+//        remoteIndex.setSingle(DECORATORS, decoratorOptions);
+//        remoteIndex.save(sync.getRemote().getFileSystem());
+//    }
 
     public static void sync() throws IOException {
         initSyncManager().execute();
@@ -114,7 +114,7 @@ public class Main {
         local.getIndex().save(local.getFileSystem());
     }
 
-    public static void setRemote(ArgumentsSupplier args) throws IOException {
+    public static void setRemote(ArgumentsSupplier args, boolean init) throws IOException {
         String remoteType = args.supplyString().toUpperCase();
         DataSetFactory factory = DataSetType.valueOf(remoteType).getFactory();
 
@@ -122,8 +122,11 @@ public class Main {
 
         DataSet local = new LocalDataSetFactory().loadFrom(getCwd());
 
-        factory.connectOrInit(local, options);
-
+        if (init) {
+            factory.init(local, options);
+        } else {
+            factory.connect(local, options);
+        }
     }
 
 

@@ -63,7 +63,7 @@ public class SyncHelper {
 
     private static DataSet connectRemote(DataSet local) throws IOException {
         NamedOptions<DataSetType> remoteConfig = local.getIndex().get(REMOTE);
-        return remoteConfig.getType().getFactory().connectOrInit(local, remoteConfig.getOptions());
+        return remoteConfig.getType().getFactory().connect(local, remoteConfig.getOptions());
     }
 
     private static void initDecorators(DataSet target, Index localIndex) throws IOException {
