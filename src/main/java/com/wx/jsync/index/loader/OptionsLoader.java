@@ -4,11 +4,10 @@ import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.SetLoader;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.util.JsonUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.wx.jsync.util.JsonUtils.getObjectOpt;
 import static com.wx.jsync.util.JsonUtils.set;
@@ -42,6 +41,8 @@ public class OptionsLoader implements Loader<Options> {
 
             if (value instanceof Options) {
                 value = create((Options) value);
+            } else if (value instanceof Collection) {
+                value = new JSONArray((Collection) value);
             }
 
             set(obj, value, key);
@@ -56,6 +57,8 @@ public class OptionsLoader implements Loader<Options> {
             Object value = obj.get(key);
             if (value instanceof JSONObject) {
                 value = getOptions((JSONObject) value);
+            } else if (value instanceof JSONArray) {
+                value = ((JSONArray) value).toList();
             }
 
             result.put(key, value);

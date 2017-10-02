@@ -73,15 +73,23 @@ public class Index {
 //    }
 
     public <E> E get(IndexKey key) {
-        return (E) key.getLoader().load(root, key.getPath());
+        return get(key, (Loader<E>) key.getLoader());
+    }
+
+    public <E> E get(IndexKey key, Loader<E> loader) {
+        return loader.load(root, key.getPath());
     }
 
     public <E> Optional<E> getOpt(IndexKey key) {
         return (Optional<E>) key.getLoader().loadOpt(root, key.getPath());
     }
 
+    public <E> void set(IndexKey key, E value, Loader<E> loader) {
+        loader.setValue(root, value, key.getPath());
+    }
+
     public <E> void set(IndexKey key, E value) {
-        ((Loader<E>) key.getLoader()).setValue(root, value, key.getPath());
+        set(key, value, (Loader<E>) key.getLoader());
     }
 
     public <E> Optional<E> getSingle(IndexKey key, String id) {

@@ -1,5 +1,6 @@
 package com.wx.jsync;
 
+import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.console.UserConsoleInterface;
 import com.wx.console.system.UnixSystemConsole;
@@ -7,8 +8,10 @@ import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.dataset.factory.impl.LocalDataSetFactory;
+import com.wx.jsync.filesystem.base.LocalFileSystem;
 import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.Index;
+import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.util.StringArgsSupplier;
@@ -19,12 +22,21 @@ import com.wx.util.representables.string.EnumCasterLC;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
+import static com.sun.org.apache.bcel.internal.generic.InstructionConstants.bla;
 import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.SyncHelper.initSyncManager;
 import static com.wx.jsync.index.IndexKey.DECORATORS;
+import static com.wx.jsync.index.IndexKey.FILE_FILTER;
+import static com.wx.jsync.index.loader.FilterLoader.BLACK_LIST_KEY;
+import static com.wx.jsync.index.loader.FilterLoader.WHITE_LIST_KEY;
 import static com.wx.jsync.util.DesktopUtils.getCwd;
+import static java.util.Collections.emptyList;
 
 public class Main {
 
@@ -54,6 +66,12 @@ public class Main {
             case "decorate":
                 addDecorator(args);
                 break;
+            case "whitelist":
+                filter(args, true);
+                break;
+            case "blacklist":
+                filter(args, false);
+                break;
             case "status":
                 System.out.println(initSyncManager().getStatus());
                 break;
@@ -63,6 +81,29 @@ public class Main {
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    private static void filter(ArgumentsSupplier args, boolean addToWhitelist) throws IOException {
+        DataSet target = getTarget(args.supplyString());
+        String filter = args.supplyString();
+
+        Index index = target.getIndex();
+        Options filters = index.get(FILE_FILTER, Loader.OPTIONS);
+
+        Set<Object> whitelist = new HashSet<>(filters.get(WHITE_LIST_KEY, emptyList()));
+        Set<Object> blacklist = new HashSet<>(filters.get(BLACK_LIST_KEY, emptyList()));
+
+        if (addToWhitelist) {
+            whitelist.add(filter);
+        } else {
+            blacklist.add(filter);
+        }
+
+        index.set(FILE_FILTER, new Options(ImmutableMap.of(
+                WHITE_LIST_KEY, whitelist,
+                BLACK_LIST_KEY, blacklist
+        )), Loader.OPTIONS);
+        index.save(target.getFileSystem());
     }
 
     private static void addDecorator(ArgumentsSupplier args) throws IOException {

@@ -18,8 +18,8 @@ import static com.wx.jsync.util.JsonUtils.getStringListOpt;
  */
 public class FilterLoader implements Loader<Predicate<String>> {
 
-    private static final String WHITE_LIST_KEY = "whitelist";
-    private static final String BLACK_LIST_KEY = "blacklist";
+    public static final String WHITE_LIST_KEY = "whitelist";
+    public static final String BLACK_LIST_KEY = "blacklist";
 
     @Override
     public Optional<Predicate<String>> loadOpt(JSONObject root, String[] key) {

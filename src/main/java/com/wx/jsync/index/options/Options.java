@@ -25,6 +25,10 @@ public class Options {
         return (E) options.get(key);
     }
 
+    public <E> E get(String key, E def) {
+        return (E) options.getOrDefault(key, def);
+    }
+
     public Set<String> keySet() {
         return options.keySet();
     }
