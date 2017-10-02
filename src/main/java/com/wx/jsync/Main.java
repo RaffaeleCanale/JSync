@@ -14,6 +14,7 @@ import com.wx.jsync.index.Index;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
+import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.util.StringArgsSupplier;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.util.log.LogHelper;
@@ -25,11 +26,13 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.logging.Level;
 
+import static com.google.common.collect.Sets.union;
 import static com.sun.org.apache.bcel.internal.generic.InstructionConstants.bla;
 import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.SyncHelper.initSyncManager;
 import static com.wx.jsync.index.IndexKey.DECORATORS;
 import static com.wx.jsync.index.IndexKey.FILE_FILTER;
+import static com.wx.jsync.index.Loader.OPTIONS;
 import static com.wx.jsync.index.loader.FilterLoader.BLACK_LIST_KEY;
 import static com.wx.jsync.index.loader.FilterLoader.WHITE_LIST_KEY;
 import static com.wx.jsync.util.DesktopUtils.getCwd;
@@ -75,9 +78,40 @@ public class Main {
             case "set-global-gdrive":
                 setGlobalDrive(args);
                 break;
+            case "copy-filters":
+                copyFilters(args);
+                break;
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    private static void copyFilters(ArgumentsSupplier args) throws IOException {
+        SyncManager sync = initSyncManager();
+
+        Index localIndex = sync.getLocal().getIndex();
+        Index remoteIndex = sync.getRemote().getIndex();
+
+        Options localFilters = localIndex.get(FILE_FILTER, Loader.OPTIONS);
+        Options remoteFilters = remoteIndex.get(FILE_FILTER, Loader.OPTIONS);
+
+
+        Options merged = new Options(ImmutableMap.of(
+                "whitelist", union(
+                        new HashSet<>(localFilters.get("whitelist", emptyList())),
+                        new HashSet<>(remoteFilters.get("whitelist", emptyList()))
+                ),
+                "blacklist", union(
+                        new HashSet<>(localFilters.get("blacklist", emptyList())),
+                        new HashSet<>(remoteFilters.get("blacklist", emptyList()))
+                )
+        ));
+
+        localIndex.set(FILE_FILTER, merged, Loader.OPTIONS);
+        remoteIndex.set(FILE_FILTER, merged, Loader.OPTIONS);
+
+        localIndex.save(sync.getLocal().getFileSystem());
+        remoteIndex.save(sync.getRemote().getFileSystem());
     }
 
     private static void filter(ArgumentsSupplier args, boolean addToWhitelist) throws IOException {
