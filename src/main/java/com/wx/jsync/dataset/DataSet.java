@@ -58,9 +58,8 @@ public class DataSet {
     }
 
     public Collection<String> getAllFileSystemFiles() throws IOException {
-        return fileSystem.getAllFiles().stream()
+        return fileSystem.getAllFiles(index.get(FILE_FILTER)).stream()
                 .filter(file -> !file.startsWith(CONFIG_DIR))
-                .filter(index.get(FILE_FILTER))
                 .collect(Collectors.toList());
     }
 

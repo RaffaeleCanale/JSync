@@ -2,6 +2,8 @@ package com.wx.jsync.filesystem;
 
 import java.io.*;
 import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 /**
@@ -11,6 +13,12 @@ import java.util.Collection;
 public interface FileSystem {
 
     FileStat getFileStat(String filename) throws IOException;
+
+    default Collection<String> getAllFiles(Predicate<String> acceptPredicate) throws IOException {
+        return getAllFiles().stream()
+                .filter(acceptPredicate)
+                .collect(Collectors.toList());
+    };
 
     Collection<String> getAllFiles() throws IOException;
 

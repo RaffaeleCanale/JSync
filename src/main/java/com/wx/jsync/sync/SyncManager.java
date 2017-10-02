@@ -2,6 +2,7 @@ package com.wx.jsync.sync;
 
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.index.IndexKey;
+import com.wx.jsync.index.Loader;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import com.wx.jsync.sync.tasks.SyncTask;
 import com.wx.jsync.sync.tasks.SyncTasks;
@@ -12,9 +13,11 @@ import com.wx.util.log.LogHelper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import static com.google.common.collect.Sets.union;
+import static com.wx.jsync.index.IndexKey.FILE_FILTER;
 import static com.wx.jsync.index.IndexKey.OWNER;
 import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
@@ -24,6 +27,7 @@ public class SyncManager {
 
     private final DataSet local;
     private final DataSet remote;
+    private final Predicate<String> filter;
 
     private boolean enableBump = true;
     private ConflictHandler conflictHandler;
@@ -32,6 +36,8 @@ public class SyncManager {
     public SyncManager(DataSet local, DataSet remote) throws IOException {
         this.local = local;
         this.remote = remote;
+        this.filter = local.getIndex().get(FILE_FILTER, Loader.FILTER)
+                .and(remote.getIndex().get(FILE_FILTER, Loader.FILTER));
 
         updateRemote();
         purgeRemoved();
@@ -98,7 +104,7 @@ public class SyncManager {
     }
 
     private SyncTasks.Builder getStatus0() {
-        return new SyncTasksAnalyzer(enableBump).computeTasks(local, remote);
+        return new SyncTasksAnalyzer(enableBump, filter).computeTasks(local, remote);
     }
 
 }

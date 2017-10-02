@@ -20,9 +20,11 @@ public class SyncTasksAnalyzer {
     private static final Logger LOG = LogHelper.getLogger(SyncTasksAnalyzer.class);
 
     private final boolean enableBump;
+    private final Predicate<String> acceptFilter;
 
-    public SyncTasksAnalyzer(boolean enableBump) {
+    public SyncTasksAnalyzer(boolean enableBump, Predicate<String> filter) {
         this.enableBump = enableBump;
+        this.acceptFilter = filter;
     }
 
     public SyncTasks.Builder computeTasks(DataSet local, DataSet remote) {
@@ -32,19 +34,19 @@ public class SyncTasksAnalyzer {
 
         Collection<SyncFile> localFiles = local.getIndex().get(FILES);
         for (SyncFile localFile : localFiles) {
-            Optional<SyncFile> remoteFile = remote.getIndex().getSingle(FILES, localFile.getPath());
+            if (acceptFilter.test(localFile.getPath())) {
+                Optional<SyncFile> remoteFile = remote.getIndex().getSingle(FILES, localFile.getPath());
 
-            visitedFiles.add(localFile.getPath());
+                visitedFiles.add(localFile.getPath());
 
-            addTask(builder, localFile, remoteFile);
+                addTask(builder, localFile, remoteFile);
+            }
         }
 
 
-        Predicate<String> localFilter = local.getIndex().get(FILE_FILTER);
-
         Collection<SyncFile> remoteFiles = remote.getIndex().get(FILES);
         for (SyncFile remoteFile : remoteFiles) {
-            if (!visitedFiles.contains(remoteFile.getPath()) && localFilter.test(remoteFile.getPath())) {
+            if (!visitedFiles.contains(remoteFile.getPath()) && acceptFilter.test(remoteFile.getPath())) {
                 builder.updateLocal(Optional.empty(), remoteFile);
             }
         }
