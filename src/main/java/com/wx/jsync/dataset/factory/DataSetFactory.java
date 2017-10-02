@@ -15,7 +15,7 @@ import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 public abstract class DataSetFactory {
 
     public final DataSet connect(DataSet local, Options options) throws IOException {
-        FileSystem remoteFs = initFileSystem(local, options);
+        FileSystem remoteFs = initFileSystem(local, options, false);
         Index remoteIndex = new Index();
 
         if (remoteFs.exists(INDEX_FILE)) {
@@ -28,7 +28,7 @@ public abstract class DataSetFactory {
     }
 
     public final DataSet init(DataSet local, Options options) throws IOException {
-        FileSystem remoteFs = initFileSystem(local, options);
+        FileSystem remoteFs = initFileSystem(local, options, true);
         Index remoteIndex = new Index();
 
         if (remoteFs.exists(INDEX_FILE)) {
@@ -46,6 +46,6 @@ public abstract class DataSetFactory {
 
     public abstract Options parseConfig(ArgumentsSupplier args);
 
-    protected abstract FileSystem initFileSystem(DataSet local, Options options) throws IOException;
+    protected abstract FileSystem initFileSystem(DataSet local, Options options, boolean create) throws IOException;
 
 }

@@ -2,6 +2,7 @@ package com.wx.jsync.dataset.factory.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
+import com.wx.io.file.FileUtil;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
@@ -41,8 +42,12 @@ public class LocalDataSetFactory extends DataSetFactory {
     }
 
     @Override
-    protected FileSystem initFileSystem(DataSet local, Options config) {
-        return new LocalFileSystem(getDirectory(config));
+    protected FileSystem initFileSystem(DataSet local, Options config, boolean create) throws IOException {
+        File directory = getDirectory(config);
+        if (create) {
+            FileUtil.autoCreateDirectory(directory);
+        }
+        return new LocalFileSystem(directory);
     }
 
     public DataSet loadFrom(File directory) throws IOException {

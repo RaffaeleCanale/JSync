@@ -21,6 +21,7 @@ import com.wx.util.log.LogHelper;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
@@ -46,7 +47,7 @@ public class GDriveDataSetFactory extends DataSetFactory {
     }
 
     @Override
-    protected FileSystem initFileSystem(DataSet local, Options options) throws IOException {
+    protected FileSystem initFileSystem(DataSet local, Options options, boolean create) throws IOException {
         initDriveService(local);
 
         String user = options.get(KEY_USER);
@@ -72,9 +73,16 @@ public class GDriveDataSetFactory extends DataSetFactory {
                 throw new IllegalArgumentException("Must specify a Drive directory");
             }
 
-            rootId = GDriveUtils.findFileByPath(drive, directory)
-                    .map(File::getId)
-                    .orElseThrow(() -> new FileNotFoundException(directory));
+            Optional<String> id = GDriveUtils.findFileByPath(drive, directory)
+                    .map(File::getId);
+            if (id.isPresent()) {
+                rootId = id.get();
+            } else if (create) {
+                rootId = GDriveUtils.mkdir(drive, directory).getId();
+            } else {
+                throw new FileNotFoundException(directory);
+            }
+
             saveConfig = true;
         }
 

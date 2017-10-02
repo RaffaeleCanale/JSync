@@ -58,6 +58,27 @@ public class GDriveUtils {
         return Optional.of(parent);
     }
 
+    public static File mkdir(DriveServiceHelper drive, String filename) throws IOException {
+        String[] path = filename.split("/");
+
+        if (path.length == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        File parent = new File().setId("root");
+        for (String dir : path) {
+            Optional<File> child = drive.getFile(parent.getId(), dir);
+            if (child.isPresent()) {
+                parent = child.get();
+            } else {
+                parent = drive.createDirectory(parent.getId(), dir);
+            }
+
+        }
+
+        return parent;
+    }
+
     public static class PathConstructor {
 
         private final String rootId;
