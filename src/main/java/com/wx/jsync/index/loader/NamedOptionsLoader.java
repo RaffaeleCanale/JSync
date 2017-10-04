@@ -3,13 +3,9 @@ package com.wx.jsync.index.loader;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
-import com.wx.jsync.util.JsonUtils;
-import com.wx.util.representables.string.EnumCasterLC;
-import jdk.nashorn.internal.scripts.JS;
+import com.wx.jsync.util.Common;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.wx.jsync.util.JsonUtils.*;
@@ -46,7 +42,7 @@ public class NamedOptionsLoader<E extends Enum<E>> implements Loader<NamedOption
     private E resolveType(JSONObject remoteObj) {
         String typeName = getString(remoteObj, "type");
 
-        return new EnumCasterLC<>(cls).castOut(typeName);
+        return Common.enumCaster(cls).castOut(typeName);
     }
 
     public JSONObject create(NamedOptions<?> config) {

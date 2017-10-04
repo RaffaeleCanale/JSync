@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
 import static com.wx.util.Format.formatDate;
 
@@ -15,12 +16,13 @@ import static com.wx.util.Format.formatDate;
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 30.09.17.
  */
-public class BackupFileSystem implements DecoratorFileSystem {
+public class BackupFileSystem extends DecoratorFileSystem {
 
     private final FileSystem fs;
     private final String backupPath;
 
-    public BackupFileSystem(FileSystem fs, String backupPath) {
+    public BackupFileSystem(String path, FileSystem fs, String backupPath) {
+        super(path);
         this.fs = fs;
         this.backupPath = backupPath;
     }
@@ -71,6 +73,11 @@ public class BackupFileSystem implements DecoratorFileSystem {
     @Override
     public boolean exists(String filename) throws IOException {
         return fs.exists(filename);
+    }
+
+    @Override
+    protected Optional<String> getUserPath(String realPath) {
+        return Optional.of(realPath);
     }
 
     private String getBackupPath(String path) {

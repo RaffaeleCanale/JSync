@@ -7,6 +7,8 @@ import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.INDEX_FILE;
@@ -15,11 +17,12 @@ import static com.wx.jsync.Constants.INDEX_FILE;
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 01.10.17.
  */
-public abstract class AbstractRenameDecorator implements DecoratorFileSystem {
+public abstract class AbstractRenameDecorator extends DecoratorFileSystem {
 
     private final FileSystem fs;
 
-    public AbstractRenameDecorator(FileSystem fs) {
+    public AbstractRenameDecorator(String path, FileSystem fs) {
+        super(path);
         this.fs = fs;
     }
 
@@ -37,6 +40,7 @@ public abstract class AbstractRenameDecorator implements DecoratorFileSystem {
     public Collection<String> getAllFiles() throws IOException {
         return fs.getAllFiles().stream()
                 .map(this::userPath0)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -65,6 +69,11 @@ public abstract class AbstractRenameDecorator implements DecoratorFileSystem {
         return fs.exists(realPath0(filename));
     }
 
+    @Override
+    protected Optional<String> getUserPath(String realPath) {
+        return Optional.ofNullable(userPath0(realPath));
+    }
+
     private String userPath0(String filename) {
         if (filename.equals(INDEX_FILE)) {
             return filename;
@@ -84,4 +93,5 @@ public abstract class AbstractRenameDecorator implements DecoratorFileSystem {
     protected abstract String userPath(String filename);
 
     protected abstract String realPath(String filename);
+
 }

@@ -5,9 +5,11 @@ import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.crypto.Crypter;
 import com.wx.crypto.CryptoException;
 import com.wx.crypto.CryptoUtil;
+import com.wx.crypto.cipher.AESCrypter;
+import com.wx.jsync.Main;
+import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 import com.wx.jsync.filesystem.decorator.factory.DecoratorFactory;
-import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.impl.CrypterFileSystem;
 import com.wx.jsync.index.Index;
 import com.wx.jsync.index.options.Options;
@@ -30,8 +32,9 @@ public class CrypterFsFactory extends DecoratorFactory {
     private static final String KEY_ALGORITHM = "algorithm";
 
     @Override
-    public Function<FileSystem, DecoratorFileSystem> initDecorator(Index localIndex, String path, Options options) throws IOException {
+    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException {
         try {
+            Index localIndex = Main.getDataSets().getLocal().getIndex();
             Crypter crypter = getCrypter(options);
             StoredKeys keys = localIndex.get(STORED_KEY);
 
@@ -49,16 +52,16 @@ public class CrypterFsFactory extends DecoratorFactory {
                 }
             }
 
-            return fs -> new CrypterFileSystem(fs, crypter);
+            return fs -> new CrypterFileSystem(path, fs, crypter);
         } catch (CryptoException e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public Options getOptions(ArgumentsSupplier args) {
+    protected Options getOptions(ArgumentsSupplier args) {
         return new Options(ImmutableMap.of(
-                KEY_ALGORITHM, args.supplyString()
+                KEY_ALGORITHM, args.hasMore() ? args.supplyString() : new AESCrypter().getAlgorithmName()
         ));
     }
 

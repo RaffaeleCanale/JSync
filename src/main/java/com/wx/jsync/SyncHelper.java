@@ -24,7 +24,7 @@ import static com.wx.jsync.util.DesktopUtils.getCwd;
  */
 public class SyncHelper {
 
-    public static SyncManager initSyncManager() throws IOException {
+    public static SyncManager initSyncManager(DataSetsHelper dataSets) throws IOException {
         /*
 
         - loadOpt local index
@@ -37,11 +37,9 @@ public class SyncHelper {
         - init sync manager
 
          */
-        DataSet local = new LocalDataSetFactory().loadFrom(getCwd());
-        DataSet remote = connectRemote(local);
 
-        initDecorators(local, local.getIndex());
-        initDecorators(remote, local.getIndex());
+        DataSet local = dataSets.getLocal();
+        DataSet remote = dataSets.getRemote();
 
         SyncManager syncManager = new SyncManager(local, remote);
         syncManager.setEnableBump(local.getIndex().get(ENABLE_BUMP));
@@ -60,24 +58,6 @@ public class SyncHelper {
 
         return executor;
     }
-
-    private static DataSet connectRemote(DataSet local) throws IOException {
-        NamedOptions<DataSetType> remoteConfig = local.getIndex().get(REMOTE);
-        return remoteConfig.getType().getFactory().connect(local, remoteConfig.getOptions());
-    }
-
-    private static void initDecorators(DataSet target, Index localIndex) throws IOException {
-        Set<NamedOptions<DecoratorType>> decorators = target.getIndex().get(DECORATORS);
-
-        for (NamedOptions<DecoratorType> decorator : decorators) {
-            Options options = decorator.getOptions();
-
-
-            decorator.getType().getFactory().getFactory(localIndex, options)
-                    .apply(target::addDecorator);
-        }
-    }
-
 
     private SyncHelper() {
     }

@@ -3,10 +3,8 @@ package com.wx.jsync.filesystem.decorator.factory;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
-import com.wx.jsync.index.Index;
 import com.wx.jsync.index.options.Options;
 import com.wx.util.pair.Pair;
-import com.wx.util.representables.string.EnumCasterLC;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -17,34 +15,27 @@ import java.util.function.Function;
  */
 public abstract class DecoratorFactory {
 
-    public static final String KEY_PATH = "mask";
-    private static final String KEY_NESTED_DECORATOR = "nested";
+    public static final String KEY_PATH = "path";
 
-
-    public Pair<String, Function<FileSystem, DecoratorFileSystem>> getFactory(Index localIndex, Options options) throws IOException {
+    public Pair<Function<FileSystem, DecoratorFileSystem>, String> getFactory(Options options) throws IOException {
         String path = options.get(KEY_PATH);
-        Options nested = options.get(KEY_NESTED_DECORATOR);
 
-        if (path == null) {
+        if (path == null || path.isEmpty()) {
             path = "";
         }
 
-        Function<FileSystem, DecoratorFileSystem> fn = initDecorator(localIndex, path, options);
+        return Pair.of(initDecorator(options, path), path);
+    }
 
-        if (nested != null) {
-            Function<FileSystem, DecoratorFileSystem> nestedFn = getNested(localIndex, nested);
-            fn = nestedFn.andThen(fn);
+    protected abstract Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException;
+
+    public Options getOptions(String selector, ArgumentsSupplier args) {
+        if (selector != null && !selector.isEmpty()) {
+            return getOptions(args).with(KEY_PATH, selector);
         }
 
-        return Pair.of(path, fn);
+        return getOptions(args);
     }
 
-    private Function<FileSystem, DecoratorFileSystem> getNested(Index localIndex, Options nestedOptions) throws IOException {
-        DecoratorFactory factory = new EnumCasterLC<>(DecoratorType.class).castOut(nestedOptions.get("type")).getFactory();
-        return factory.getFactory(localIndex, nestedOptions).get2();
-    }
-
-    protected abstract Function<FileSystem, DecoratorFileSystem> initDecorator(Index localIndex, String path, Options options) throws IOException;
-
-    public abstract Options getOptions(ArgumentsSupplier args);
+    protected abstract Options getOptions(ArgumentsSupplier args);
 }

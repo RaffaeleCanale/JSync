@@ -5,6 +5,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
+import com.wx.jsync.Main;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.DataSetFactory;
@@ -47,8 +48,8 @@ public class GDriveDataSetFactory extends DataSetFactory {
     }
 
     @Override
-    protected FileSystem initFileSystem(DataSet local, Options options, boolean create) throws IOException {
-        initDriveService(local);
+    protected FileSystem initFileSystem(Options options, boolean create) throws IOException {
+        initDriveService();
 
         String user = options.get(KEY_USER);
         String rootId = options.get(KEY_ROOT_ID);
@@ -93,20 +94,19 @@ public class GDriveDataSetFactory extends DataSetFactory {
                     KEY_ROOT_ID, rootId
             )));
 
-            local.getIndex().set(REMOTE, remoteConfig);
-            local.getIndex().save(local.getFileSystem());
+            Main.getDataSets().getLocal().getIndex().set(REMOTE, remoteConfig);
         }
 
         return new GDriveFileSystem(drive, rootId);
     }
 
-    private static void initDriveService(DataSet local) throws IOException {
+    private static void initDriveService() throws IOException {
         if (DriveServiceFactory.isInit()) {
             return;
         }
 
         try {
-            LocalFileSystem localFs = local.getBaseFs();
+            LocalFileSystem localFs = Main.getDataSets().getLocal().getBaseFs();
             java.io.File localDir = localFs.getFile(GOOGLE_DIR);
             java.io.File globalDir = new java.io.File(GOOGLE_DIR_GLOBAL);
 

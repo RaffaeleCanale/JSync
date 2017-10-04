@@ -18,11 +18,12 @@ import java.util.function.Function;
  * @version 0.1 - created on 30.09.17.
  */
 public class BackupFsFactory extends DecoratorFactory {
+
     @Override
-    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Index localIndex, String path, Options options) throws IOException {
+    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException {
         String backupPath = getBackupPath(options);
 
-        return fs -> new BackupFileSystem(fs, backupPath);
+        return fs -> new BackupFileSystem(path, fs, backupPath);
     }
 
     @Override

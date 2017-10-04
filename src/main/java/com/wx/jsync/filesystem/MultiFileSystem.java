@@ -13,16 +13,19 @@ import java.util.function.Function;
  */
 public class MultiFileSystem implements FileSystem {
 
-    private final FileSystem baseFs;
+    private final BaseFsWithView baseFs;
+//    private final SortedMap<String, DecoratorFileSystem> realpathLookup = new TreeMap<>(Comparator.comparingInt(String::length).reversed());
+
     private final SortedMap<String, DecoratorFileSystem> decorators = new TreeMap<>(Comparator.comparingInt(String::length).reversed());
 
-
     public MultiFileSystem(FileSystem baseFs) {
-        this.baseFs = baseFs;
+        this.baseFs = new BaseFsWithView(baseFs);
     }
 
-    public void addDecorator(String path, Function<FileSystem, DecoratorFileSystem> factory) {
-        decorators.put(path, factory.apply(new BaseFsWithView(baseFs)));
+    public void addDecorator(Function<FileSystem, DecoratorFileSystem> factory, String path) {
+        FileSystem parentFs = resolveFs(path);
+
+        decorators.put(path, factory.apply(parentFs));
     }
 
     @Override
@@ -32,13 +35,13 @@ public class MultiFileSystem implements FileSystem {
 
     @Override
     public Collection<String> getAllFiles() throws IOException {
-        Collection<String> allFiles = baseFs.getAllFiles();
+        Collection<String> allFiles = getBaseFs().getAllFiles();
 
         Map<String, Collection<String>> decoratorFiles = new HashMap<>();
         Collection<String> baseFiles = new ArrayList<>();
 
         for (String file : allFiles) {
-            Optional<String> decoratorPath = resolve(file);
+            Optional<String> decoratorPath = reverseResolve(file);
             if (decoratorPath.isPresent()) {
                 decoratorFiles
                         .computeIfAbsent(decoratorPath.get(), k -> new ArrayList<>())
@@ -52,12 +55,10 @@ public class MultiFileSystem implements FileSystem {
         for (String decoratorPath : decoratorFiles.keySet()) {
             Collection<String> files = decoratorFiles.get(decoratorPath);
             DecoratorFileSystem decorator = decorators.get(decoratorPath);
-            BaseFsWithView fsView = decorator.getBaseFs();
 
-            fsView.setView(files);
-
+            baseFs.setView(files);
             decoratorFiles.put(decoratorPath, decorator.getAllFiles());
-            fsView.setView(null);
+            baseFs.setView(null);
         }
 
         decoratorFiles.values().forEach(baseFiles::addAll);
@@ -98,9 +99,20 @@ public class MultiFileSystem implements FileSystem {
         return resolveFs(filename).exists(filename);
     }
 
-    private Optional<String> resolve(String filename) {
+    private Optional<String> reverseResolve(String realpath) {
+        for (DecoratorFileSystem decorator : decorators.values()) {
+            if (decorator.resolvePath(realpath).isPresent()) {
+                return Optional.of(decorator.getPath());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
+    private Optional<String> resolve(String userpath) {
         for (String path : decorators.keySet()) {
-            if (filename.startsWith(path)) {
+            if (userpath.startsWith(path)) {
                 return Optional.of(path);
             }
         }
@@ -109,12 +121,13 @@ public class MultiFileSystem implements FileSystem {
     }
 
     private FileSystem resolveFs(String filename) {
-        Optional<FileSystem> fs = resolve(filename).map(decorators::get);
-        return fs.orElse(baseFs);
+        return resolve(filename)
+                .map(path -> (FileSystem) decorators.get(path))
+                .orElse(baseFs);
     }
 
     public FileSystem getBaseFs() {
-        return baseFs;
+        return baseFs.fs;
     }
 
     private static class BaseFsWithView implements FileSystem {
@@ -125,6 +138,24 @@ public class MultiFileSystem implements FileSystem {
         public BaseFsWithView(FileSystem fs) {
             this.fs = fs;
         }
+
+        //        public BaseFsWithView() {
+//            super(null);
+//        }
+
+//        @Override
+//        public <E extends FileSystem> E getBaseFs() {
+//            return (E) fs;
+//        }
+//
+//        @Override
+//        protected Optional<String> getUserPath(String realPath) {
+//            return Optional.of(realPath);
+//        }
+
+//        public void setFs(FileSystem fs) {
+//            this.fs = fs;
+//        }
 
         public void setView(Collection<String> view) {
             this.view = view;

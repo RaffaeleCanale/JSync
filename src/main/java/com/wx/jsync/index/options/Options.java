@@ -1,9 +1,6 @@
 package com.wx.jsync.index.options;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.wx.util.collections.CollectionsUtil.safe;
 
@@ -33,5 +30,11 @@ public class Options {
         return options.keySet();
     }
 
+    public Options with(String key, Object value) {
+        HashMap<String, Object> copy = new HashMap<>(options);
+        copy.put(key, value);
+
+        return new Options(copy);
+    }
 
 }

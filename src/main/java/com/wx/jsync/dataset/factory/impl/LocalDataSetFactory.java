@@ -42,7 +42,7 @@ public class LocalDataSetFactory extends DataSetFactory {
     }
 
     @Override
-    protected FileSystem initFileSystem(DataSet local, Options config, boolean create) throws IOException {
+    protected FileSystem initFileSystem(Options config, boolean create) throws IOException {
         File directory = getDirectory(config);
         if (create) {
             FileUtil.autoCreateDirectory(directory);

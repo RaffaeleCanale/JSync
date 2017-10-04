@@ -40,6 +40,7 @@ public class SyncTasks {
 
         appendList(report, "Files to push:", PUSH);
         appendList(report, "Files to pull:", PULL);
+        // TODO: 03.10.17 BOLD AND RED!!
         appendList(report, "Files to remove:", REMOVE_REMOTE, REMOVE_LOCAL);
         appendList(report, "Conflicts:", CONFLICT);
         appendList(report, "Version bumps:", SOFT_PULL, SOFT_PUSH);

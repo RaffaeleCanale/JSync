@@ -22,9 +22,7 @@ import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
-import static com.wx.jsync.index.IndexKey.FILES;
-import static com.wx.jsync.index.IndexKey.FILE_FILTER;
-import static com.wx.jsync.index.IndexKey.OWNER;
+import static com.wx.jsync.index.IndexKey.*;
 import static com.wx.jsync.util.Common.bumpVersion;
 
 public class DataSet {
@@ -51,8 +49,8 @@ public class DataSet {
         return (E) this.fileSystem.getBaseFs();
     }
 
-    public DataSet addDecorator(String path, Function<FileSystem, DecoratorFileSystem> factory) {
-        fileSystem.addDecorator(path, factory);
+    public DataSet addDecorator(Function<FileSystem, DecoratorFileSystem> factory, String path) {
+        fileSystem.addDecorator(factory, path);
 
         return this;
     }
@@ -158,5 +156,9 @@ public class DataSet {
         }
 
         return sum > 0;
+    }
+
+    public void saveIndex() throws IOException {
+        index.save(fileSystem);
     }
 }

@@ -22,8 +22,8 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
 
     private final Crypter crypter;
 
-    public CrypterFileSystem(FileSystem fs, Crypter crypter) {
-        super(fs);
+    public CrypterFileSystem(String path, FileSystem fs, Crypter crypter) {
+        super(path, fs);
         this.crypter = crypter;
     }
 
@@ -57,7 +57,8 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
         super.write(filename, input);
     }
 
-    protected String realPath(String userPath) {
+    @Override
+    protected  String realPath(String userPath) {
         if (useEncryption(userPath)) {
             return userPath + ENCRYPTED_EXTENSION;
         }
@@ -65,6 +66,7 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
         return userPath;
     }
 
+    @Override
     protected String userPath(String realPath) {
         if (useEncryption(realPath)) {
             return realPath.substring(0, realPath.length() - ENCRYPTED_EXTENSION.length());

@@ -4,6 +4,7 @@ import com.wx.jsync.filesystem.FileSystem;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -15,22 +16,24 @@ public class ViewDecorator extends AbstractRenameDecorator {
     private final String viewDirectory;
 
 
-    public ViewDecorator(FileSystem fs, String viewDirectory) {
-        super(fs);
-        this.viewDirectory = viewDirectory;
+    public ViewDecorator(String path, FileSystem fs, String viewDirectory) {
+        super(path, fs);
+        this.viewDirectory = viewDirectory + "/";
     }
 
     @Override
     public Collection<String> getAllFiles() throws IOException {
-        return super.getAllFiles().stream()
+        return getBaseFs().getAllFiles().stream()
                 .filter(p -> p.startsWith(viewDirectory))
+                .map(this::userPath)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     @Override
     protected String userPath(String filename) {
         if (!filename.startsWith(viewDirectory)) {
-            throw new RuntimeException("Expected " + filename + " to start with " + filename);
+            return null;
         }
 
         return filename.substring(viewDirectory.length());

@@ -2,6 +2,7 @@ package com.wx.jsync.index;
 
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.sync.SyncFile;
+import com.wx.jsync.util.JsonUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -99,6 +100,10 @@ public class Index {
 
     public <E> void setSingle(IndexKey key, E value) {
         ((SetLoader<E>) key.getLoader()).setSingleValue(root, key.getPath(), value);
+    }
+
+    public <E> void remove(IndexKey key) {
+        JsonUtils.remove(root, key.getPath());
     }
 
     public <E> void removeSingle(IndexKey key, E value) {
