@@ -41,7 +41,7 @@ public class DataSet {
         return index;
     }
 
-    public FileSystem getFileSystem() {
+    public MultiFileSystem getFileSystem() {
         return fileSystem;
     }
 

@@ -27,6 +27,10 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
         this.crypter = crypter;
     }
 
+    @Override
+    public String toString() {
+        return crypter.getAlgorithmName() + "[" + getBaseFs() + "]";
+    }
 
     @Override
     public InputStream read(String filename) throws IOException {

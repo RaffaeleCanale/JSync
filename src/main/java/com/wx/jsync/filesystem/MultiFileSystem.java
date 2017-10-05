@@ -120,7 +120,13 @@ public class MultiFileSystem implements FileSystem {
         return Optional.empty();
     }
 
-    private FileSystem resolveFs(String filename) {
+    public FileSystem reverseResolveFs(String filename) {
+        return reverseResolve(filename)
+                .map(path -> (FileSystem) decorators.get(path))
+                .orElse(baseFs);
+    }
+
+    public FileSystem resolveFs(String filename) {
         return resolve(filename)
                 .map(path -> (FileSystem) decorators.get(path))
                 .orElse(baseFs);
@@ -137,6 +143,11 @@ public class MultiFileSystem implements FileSystem {
 
         public BaseFsWithView(FileSystem fs) {
             this.fs = fs;
+        }
+
+        @Override
+        public String toString() {
+            return fs.toString();
         }
 
         //        public BaseFsWithView() {

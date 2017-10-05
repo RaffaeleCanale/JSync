@@ -31,6 +31,11 @@ public class GDriveFileSystem implements FileSystem {
     }
 
     @Override
+    public String toString() {
+        return "GDrive(" + rootId + ")";
+    }
+
+    @Override
     public FileStat getFileStat(String filename) throws IOException {
         ensureHasList();
 

@@ -29,7 +29,7 @@ public class Main {
 
         ArgumentsSupplier args = new StringArgsSupplier(argv);
 
-        Commands cmd = null;
+        Commands cmd;
         try {
             cmd = Common.enumCaster(Commands.class).castOut(args.supplyString());
         } catch (Exception e) {

@@ -25,6 +25,11 @@ public class LocalFileSystem implements FileSystem {
     }
 
     @Override
+    public String toString() {
+        return "Local(" + directory + ")";
+    }
+
+    @Override
     public FileStat getFileStat(String filename) throws IOException {
         return FileStat.compute(getFile(filename));
     }

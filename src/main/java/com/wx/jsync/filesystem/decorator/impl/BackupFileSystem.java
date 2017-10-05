@@ -28,6 +28,11 @@ public class BackupFileSystem extends DecoratorFileSystem {
     }
 
     @Override
+    public String toString() {
+        return "Backup[" + fs + "]";
+    }
+
+    @Override
     public <E extends FileSystem> E getBaseFs() {
         return (E) fs;
     }

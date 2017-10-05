@@ -22,6 +22,11 @@ public class ViewDecorator extends AbstractRenameDecorator {
     }
 
     @Override
+    public String toString() {
+        return "View(" + viewDirectory + ")[" + getBaseFs() + "]";
+    }
+
+    @Override
     public Collection<String> getAllFiles() throws IOException {
         return getBaseFs().getAllFiles().stream()
                 .filter(p -> p.startsWith(viewDirectory))

@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
+import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.Index;
 import com.wx.jsync.index.IndexKey;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
+import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.util.Common;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.util.representables.TypeCaster;
@@ -17,8 +19,7 @@ import com.wx.util.representables.TypeCaster;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,8 +27,7 @@ import static com.google.common.collect.Sets.union;
 import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.Main.dataSets;
 import static com.wx.jsync.SyncHelper.initSyncManager;
-import static com.wx.jsync.index.IndexKey.DECORATORS;
-import static com.wx.jsync.index.IndexKey.FILE_FILTER;
+import static com.wx.jsync.index.IndexKey.*;
 import static com.wx.jsync.index.loader.FilterLoader.BLACK_LIST_KEY;
 import static com.wx.jsync.index.loader.FilterLoader.WHITE_LIST_KEY;
 import static com.wx.jsync.util.Common.*;
@@ -283,6 +283,52 @@ public enum Commands {
 
             target.getIndex().remove(key);
             target.saveIndex();
+        }
+    },
+    DECORATOR_DEBUG {
+        @Override
+        public String usage(ArgumentsSupplier args) {
+            return "[local|remote] [fs|index]";
+        }
+
+        @Override
+        public void execute(ArgumentsSupplier args) throws IOException {
+            DataSet target = dataSets.getByName(args.supplyString());
+            String source = "index";
+            if (args.hasMore()) {
+                source = args.supplyString();
+            }
+
+            Map<FileSystem, Set<String>> fsToFiles = new HashMap<>();
+
+            if (source.equals("index")) {
+                Collection<SyncFile> files = target.getIndex().get(FILES);
+
+                for (SyncFile file : files) {
+                    String path = file.getPath();
+                    FileSystem fs = target.getFileSystem().resolveFs(path);
+                    fsToFiles.computeIfAbsent(fs, k -> new HashSet<>()).add(path);
+                }
+
+            } else if (source.equals("fs")) {
+                Collection<String> files = target.getFileSystem().getAllFiles(
+                        target.getIndex().get(FILE_FILTER)
+                );
+
+                for (String file : files) {
+                    FileSystem fs = target.getFileSystem().resolveFs(file);
+                    fsToFiles.computeIfAbsent(fs, k -> new HashSet<>()).add(file);
+                }
+            } else {
+                throw new IllegalArgumentException();
+            }
+
+            for (FileSystem fs : fsToFiles.keySet()) {
+                System.out.println(fs);
+                for (String file : fsToFiles.get(fs)) {
+                    System.out.println("  - " + file);
+                }
+            }
         }
     };
 
