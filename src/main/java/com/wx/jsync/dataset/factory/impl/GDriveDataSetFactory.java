@@ -5,8 +5,8 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
+import com.wx.jsync.GlobalConfig;
 import com.wx.jsync.Main;
-import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
@@ -25,9 +25,7 @@ import java.security.GeneralSecurityException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.Constants.GOOGLE_DIR;
-import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.dataset.DataSetType.GDRIVE;
 import static com.wx.jsync.index.IndexKey.REMOTE;
 
@@ -108,7 +106,7 @@ public class GDriveDataSetFactory extends DataSetFactory {
         try {
             LocalFileSystem localFs = Main.getDataSets().getLocal().getBaseFs();
             java.io.File localDir = localFs.getFile(GOOGLE_DIR);
-            java.io.File globalDir = new java.io.File(GOOGLE_DIR_GLOBAL);
+            java.io.File globalDir = GlobalConfig.getGoogleDir();
 
             if (!localDir.isDirectory() && globalDir.isDirectory()) {
                 DriveServiceFactory.init(globalDir);

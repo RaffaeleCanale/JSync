@@ -16,6 +16,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.Oauth2Scopes;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.wx.jsync.GlobalConfig;
 import com.wx.jsync.util.DesktopUtils;
 import com.wx.util.Format;
 import com.wx.util.log.LogHelper;
@@ -116,8 +117,7 @@ public class DriveServiceFactory {
     private static Credential getCredential(boolean authorizeIfNeeded) throws IOException {
         // Load client secrets.
         //noinspection SpellCheckingInspection
-        InputStream in =
-                DriveServiceFactory.class.getResourceAsStream("/google/client_secret.json");
+        InputStream in = GlobalConfig.getClientSecret();
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 

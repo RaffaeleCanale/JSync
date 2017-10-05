@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.union;
-import static com.wx.jsync.Constants.GOOGLE_DIR_GLOBAL;
 import static com.wx.jsync.Main.dataSets;
 import static com.wx.jsync.SyncHelper.initSyncManager;
 import static com.wx.jsync.index.IndexKey.*;
@@ -227,7 +226,7 @@ public enum Commands {
 
         @Override
         public void execute(ArgumentsSupplier args) throws IOException {
-            File dir = new File(GOOGLE_DIR_GLOBAL);
+            File dir = GlobalConfig.getGoogleDir();
 
             try {
                 DriveServiceFactory.init(dir);
