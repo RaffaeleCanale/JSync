@@ -62,6 +62,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>google/client_secret.json</exclude>
+                </excludes>
             </resource>
         </resources>
     </build>
