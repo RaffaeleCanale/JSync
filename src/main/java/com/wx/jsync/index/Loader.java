@@ -12,6 +12,7 @@ import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -24,14 +25,14 @@ public interface Loader<E> {
 
     Loader<String> STRING = new StringLoader();
     Loader<Boolean> BOOLEAN = new BooleanLoader();
-    Loader<Set<String>> STRING_SET = new StringSetLoader();
+    Loader<Collection<String>> STRING_SET = new StringSetLoader();
 
     Loader<NamedOptions<DataSetType>> DATA_SET_OPTIONS = new NamedOptionsLoader<>(DataSetType.class);
-    Loader<Set<NamedOptions<DecoratorType>>> DECORATOR_SET = new DecoratorSetLoader();
+    Loader<Collection<NamedOptions<DecoratorType>>> DECORATOR_SET = new DecoratorSetLoader();
     Loader<StoredKeys> STORED_KEYS = new StoredKeysLoader();
     Loader<Predicate<String>> FILTER = new FilterLoader();
     Loader<ConflictHandler> HANDLER = new ConflictHandlerLoader();
-    Loader<Set<SyncFile>> FILE_SET = new FilesLoader();
+    Loader<Collection<SyncFile>> FILE_SET = new FilesLoader();
     Loader<Options> OPTIONS = new OptionsLoader();
 
     static Loader<Boolean> BOOLEAN(boolean def) {

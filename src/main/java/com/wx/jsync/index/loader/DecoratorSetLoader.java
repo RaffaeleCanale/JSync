@@ -1,5 +1,6 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.jsync.ListLoader;
 import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.SetLoader;
@@ -12,15 +13,9 @@ import static com.wx.jsync.filesystem.decorator.factory.DecoratorFactory.KEY_PAT
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 30.09.17.
  */
-public class DecoratorSetLoader extends SetLoader<NamedOptions<DecoratorType>> {
+public class DecoratorSetLoader extends ListLoader<NamedOptions<DecoratorType>> {
 
     private static final Loader<NamedOptions<DecoratorType>> DECORATOR_LOADER = new NamedOptionsLoader<>(DecoratorType.class);
-
-    @Override
-    protected String getId(NamedOptions<DecoratorType> decorator) {
-        String path = decorator.getOptions().get(KEY_PATH);
-        return path == null ? "" : path;
-    }
 
     @Override
     protected NamedOptions<DecoratorType> load(Object entry) {

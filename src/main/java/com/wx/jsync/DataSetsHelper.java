@@ -9,6 +9,7 @@ import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 
 import static com.wx.jsync.filesystem.decorator.factory.DecoratorFactory.KEY_PATH;
@@ -64,7 +65,7 @@ public class DataSetsHelper {
     }
 
     private static void initDecorators(DataSet target) throws IOException {
-        Set<NamedOptions<DecoratorType>> decorators = target.getIndex().get(DECORATORS);
+        Collection<NamedOptions<DecoratorType>> decorators = target.getIndex().get(DECORATORS);
 
         for (NamedOptions<DecoratorType> decorator : decorators) {
             Options options = decorator.getOptions();

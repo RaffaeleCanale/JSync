@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 
+import static com.wx.jsync.Constants.INDEX_FILE;
 import static com.wx.util.Format.formatDate;
 
 /**
@@ -59,7 +60,7 @@ public class BackupFileSystem extends DecoratorFileSystem {
     }
 
     private void backup(String filename) throws IOException {
-        if (fs.exists(filename)) {
+        if (!filename.equals(INDEX_FILE) && fs.exists(filename)) {
             fs.move(filename, getBackupPath(filename));
         }
     }

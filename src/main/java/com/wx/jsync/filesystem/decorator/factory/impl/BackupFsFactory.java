@@ -11,6 +11,7 @@ import com.wx.jsync.index.Index;
 import com.wx.jsync.index.options.Options;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.function.Function;
 
 /**
@@ -28,9 +29,14 @@ public class BackupFsFactory extends DecoratorFactory {
 
     @Override
     public Options getOptions(ArgumentsSupplier args) {
-        return new Options(ImmutableMap.of(
-                "backupDirectory", args
-        ));
+        if (args.hasMore()) {
+            return new Options(ImmutableMap.of(
+                    "backupDirectory", args.supplyString()
+            ));
+
+        } else {
+            return new Options(Collections.emptyMap());
+        }
     }
 
     private String getBackupPath(Options options) {

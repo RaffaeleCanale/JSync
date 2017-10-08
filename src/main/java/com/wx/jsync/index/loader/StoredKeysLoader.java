@@ -29,12 +29,12 @@ public class StoredKeysLoader implements Loader<StoredKeys> {
 
     @Override
     public Optional<StoredKeys> loadOpt(JSONObject root, String[] p) {
-        Optional<Set<Options>> optionsOpt = list.loadOpt(root, p);
+        Optional<Collection<Options>> optionsOpt = list.loadOpt(root, p);
         if (!optionsOpt.isPresent()) {
             return Optional.empty();
         }
 
-        Set<Options> options = optionsOpt.get();
+        Collection<Options> options = optionsOpt.get();
         EncodedBytesRepr caster = new EncodedBytesRepr();
 
         byte[] global = null;

@@ -1,5 +1,6 @@
 package com.wx.jsync.index;
 
+import com.wx.jsync.ListLoader;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.util.JsonUtils;
@@ -94,12 +95,12 @@ public class Index {
     }
 
     public <E> Optional<E> getSingle(IndexKey key, String id) {
-        return ((SetLoader<E>) key.getLoader()).getSingleValue(root, key.getPath(), id);
+        return ((ListLoader<E>) key.getLoader()).getSingleValue(root, key.getPath(), id);
 
     }
 
     public <E> void setSingle(IndexKey key, E value) {
-        ((SetLoader<E>) key.getLoader()).setSingleValue(root, key.getPath(), value);
+        ((ListLoader<E>) key.getLoader()).setSingleValue(root, key.getPath(), value);
     }
 
     public <E> void remove(IndexKey key) {
@@ -107,7 +108,7 @@ public class Index {
     }
 
     public <E> void removeSingle(IndexKey key, E value) {
-        ((SetLoader<E>) key.getLoader()).removeSingleValue(root, key.getPath(), value);
+        ((ListLoader<E>) key.getLoader()).removeSingleValue(root, key.getPath(), value);
     }
 
 //    public Optional<String> getStringOpt(IndexKey key) {
