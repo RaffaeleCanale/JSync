@@ -100,7 +100,11 @@ public class Index {
     }
 
     public <E> void setSingle(IndexKey key, E value) {
-        ((ListLoader<E>) key.getLoader()).setSingleValue(root, key.getPath(), value);
+        setSingle(key, value, (ListLoader<E>) key.getLoader());
+    }
+
+    public <E> void setSingle(IndexKey key, E value, ListLoader<E> loader) {
+        loader.setSingleValue(root, key.getPath(), value);
     }
 
     public <E> void remove(IndexKey key) {

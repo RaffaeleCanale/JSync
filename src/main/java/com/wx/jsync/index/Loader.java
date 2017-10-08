@@ -1,5 +1,6 @@
 package com.wx.jsync.index;
 
+import com.wx.jsync.ListLoader;
 import com.wx.jsync.dataset.DataSetType;
 import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.loader.*;
@@ -25,7 +26,8 @@ public interface Loader<E> {
 
     Loader<String> STRING = new StringLoader();
     Loader<Boolean> BOOLEAN = new BooleanLoader();
-    Loader<Collection<String>> STRING_SET = new StringSetLoader();
+    ListLoader<String> STRING_SET = new StringSetLoader();
+    ListLoader<String> STRING_LIST = new StringListLoader();
 
     Loader<NamedOptions<DataSetType>> DATA_SET_OPTIONS = new NamedOptionsLoader<>(DataSetType.class);
     Loader<Collection<NamedOptions<DecoratorType>>> DECORATOR_SET = new DecoratorSetLoader();

@@ -15,7 +15,7 @@ public enum IndexKey {
     PARTICIPANTS    (STRING_SET,                        "info", "participants"),
     STORED_KEY      (STORED_KEYS,                       "info", "key"),
     ENABLE_STORE_KEY(BOOLEAN(DEFAULT_STORE_KEY),        "info", "options", "storeKey"),
-    FILE_FILTER     (FILTER,                            "info", "options", "filter"),
+    FILE_FILTER     (FILTER,                            "info", "options", "ignore"),
     ENABLE_BUMP     (BOOLEAN(DEFAULT_ENABLE_BUMP),      "info", "options", "executor", "useBump"),
     ASK_CONFIRMATION(BOOLEAN(DEFAULT_ASK_CONFIRMATION), "info", "options", "executor", "askConfirmation"),
     CONFLICT_HANDLER(HANDLER,                           "info", "options", "executor", "conflictHandler"),

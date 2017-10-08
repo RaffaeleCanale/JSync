@@ -18,18 +18,10 @@ import static com.wx.jsync.util.JsonUtils.getStringListOpt;
  */
 public class FilterLoader implements Loader<Predicate<String>> {
 
-    public static final String WHITE_LIST_KEY = "whitelist";
-    public static final String BLACK_LIST_KEY = "blacklist";
-
     @Override
     public Optional<Predicate<String>> loadOpt(JSONObject root, String[] key) {
-//        return getStringListOpt(root, key)
-//                .map(FilterLoader::ignoreFilter);
-        return getObjectOpt(root, key)
-                .map(obj -> createFilter(
-                        getStringListOpt(obj, WHITE_LIST_KEY).orElse(Collections.emptyList()),
-                        getStringListOpt(obj, BLACK_LIST_KEY).orElse(Collections.emptyList())
-                ));
+        return getStringListOpt(root, key)
+                .map(FilterLoader::createFilter);
 
     }
 
@@ -43,9 +35,21 @@ public class FilterLoader implements Loader<Predicate<String>> {
         return loadOpt(root, key).orElse(FilterLoader.alwaysTrue());
     }
 
-    private static Predicate<String> createFilter(List<String> whiteList, List<String> blacklist) {
-//        return file -> ignoreList.stream().noneMatch(file::matches);
-        return file -> whiteList.stream().anyMatch(file::matches) || blacklist.stream().noneMatch(file::matches);
+    private static Predicate<String> createFilter(List<String> list) {
+        return file -> {
+            boolean matches = true;
+
+            for (String filter : list) {
+                if (filter.startsWith("!") && file.matches(filter.substring(1))) {
+                    matches = true;
+
+                } else if (file.matches(filter)) {
+                    matches = false;
+                }
+            }
+
+            return matches;
+        };
     }
 
     private static <E> Predicate<E> alwaysTrue() {

@@ -1,6 +1,5 @@
 package com.wx.jsync;
 
-import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.DataSetType;
@@ -23,14 +22,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Sets.union;
 import static com.wx.jsync.Main.dataSets;
 import static com.wx.jsync.SyncHelper.initSyncManager;
 import static com.wx.jsync.index.IndexKey.*;
-import static com.wx.jsync.index.loader.FilterLoader.BLACK_LIST_KEY;
-import static com.wx.jsync.index.loader.FilterLoader.WHITE_LIST_KEY;
 import static com.wx.jsync.util.Common.*;
-import static java.util.Collections.emptyList;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
@@ -166,10 +161,10 @@ public enum Commands {
             target.saveIndex();
         }
     },
-    WHITELIST {
+    IGNORE {
         @Override
         public String usage(ArgumentsSupplier args) {
-            return "[local|remote] <expression_to_whitelist>";
+            return "[local|remote] <expression_to_ignore>";
         }
 
         @Override
@@ -178,43 +173,7 @@ public enum Commands {
             String filter = args.supplyString();
 
             Index index = target.getIndex();
-            Options filters = index.get(FILE_FILTER, Loader.OPTIONS);
-
-            Set<Object> whitelist = new HashSet<>(filters.get(WHITE_LIST_KEY, emptyList()));
-            Set<Object> blacklist = new HashSet<>(filters.get(BLACK_LIST_KEY, emptyList()));
-
-            whitelist.add(filter);
-
-            index.set(FILE_FILTER, new Options(ImmutableMap.of(
-                    WHITE_LIST_KEY, whitelist,
-                    BLACK_LIST_KEY, blacklist
-            )), Loader.OPTIONS);
-            target.saveIndex();
-        }
-    },
-    BLACKLIST {
-        @Override
-        public String usage(ArgumentsSupplier args) {
-            return "[local|remote] <expression_to_blacklist>";
-        }
-
-        @Override
-        public void execute(ArgumentsSupplier args) throws IOException {
-            DataSet target = dataSets.getByName(args.supplyString());
-            String filter = args.supplyString();
-
-            Index index = target.getIndex();
-            Options filters = index.get(FILE_FILTER, Loader.OPTIONS);
-
-            Set<Object> whitelist = new HashSet<>(filters.get(WHITE_LIST_KEY, emptyList()));
-            Set<Object> blacklist = new HashSet<>(filters.get(BLACK_LIST_KEY, emptyList()));
-
-            blacklist.add(filter);
-
-            index.set(FILE_FILTER, new Options(ImmutableMap.of(
-                    WHITE_LIST_KEY, whitelist,
-                    BLACK_LIST_KEY, blacklist
-            )), Loader.OPTIONS);
+            index.setSingle(FILE_FILTER, filter, Loader.STRING_LIST);
             target.saveIndex();
         }
     },
@@ -234,39 +193,6 @@ public enum Commands {
             } catch (GeneralSecurityException e) {
                 throw new IOException(e);
             }
-        }
-    },
-    COPY_FILTERS {
-        @Override
-        public String usage(ArgumentsSupplier args) {
-            return "";
-        }
-
-        @Override
-        public void execute(ArgumentsSupplier args) throws IOException {
-            Index localIndex = dataSets.getLocal().getIndex();
-            Index remoteIndex = dataSets.getRemote().getIndex();
-
-            Options localFilters = localIndex.get(FILE_FILTER, Loader.OPTIONS);
-            Options remoteFilters = remoteIndex.get(FILE_FILTER, Loader.OPTIONS);
-
-
-            Options merged = new Options(ImmutableMap.of(
-                    "whitelist", union(
-                            new HashSet<>(localFilters.get("whitelist", emptyList())),
-                            new HashSet<>(remoteFilters.get("whitelist", emptyList()))
-                    ),
-                    "blacklist", union(
-                            new HashSet<>(localFilters.get("blacklist", emptyList())),
-                            new HashSet<>(remoteFilters.get("blacklist", emptyList()))
-                    )
-            ));
-
-            localIndex.set(FILE_FILTER, merged, Loader.OPTIONS);
-            remoteIndex.set(FILE_FILTER, merged, Loader.OPTIONS);
-
-            dataSets.getLocal().saveIndex();
-            dataSets.getRemote().saveIndex();
         }
     },
     RESET_OPTION {
