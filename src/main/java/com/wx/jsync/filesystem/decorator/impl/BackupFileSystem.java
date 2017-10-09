@@ -19,71 +19,64 @@ import static com.wx.util.Format.formatDate;
  */
 public class BackupFileSystem extends DecoratorFileSystem {
 
-    private final FileSystem fs;
     private final String backupPath;
 
-    public BackupFileSystem(String path, FileSystem fs, String backupPath) {
-        super(path);
-        this.fs = fs;
+    public BackupFileSystem(FileSystem baseFs, String prefix, String backupPath) {
+        super(baseFs, prefix);
         this.backupPath = backupPath;
     }
 
     @Override
     public String toString() {
-        return "Backup[" + fs + "]";
-    }
-
-    @Override
-    public <E extends FileSystem> E getBaseFs() {
-        return (E) fs;
+        return "Backup[" + getBaseFs() + "]";
     }
 
     @Override
     public FileStat getFileStat(String filename) throws IOException {
-        return fs.getFileStat(filename);
+        return getBaseFs().getFileStat(filename);
     }
 
     @Override
     public Collection<String> getAllFiles() throws IOException {
-        return fs.getAllFiles();
+        return getBaseFs().getAllFiles();
     }
 
     @Override
     public InputStream read(String filename) throws IOException {
-        return fs.read(filename);
+        return getBaseFs().read(filename);
     }
 
     @Override
     public void write(String filename, InputStream input) throws IOException {
         backup(filename);
-        fs.write(filename, input);
+        getBaseFs().write(filename, input);
     }
 
     private void backup(String filename) throws IOException {
-        if (!filename.equals(INDEX_FILE) && fs.exists(filename)) {
-            fs.move(filename, getBackupPath(filename));
+        if (!filename.equals(INDEX_FILE) && getBaseFs().exists(filename)) {
+            getBaseFs().move(filename, getBackupPath(filename));
         }
     }
 
     @Override
     public void remove(String filename) throws IOException {
         backup(filename);
-        fs.remove(filename);
+        getBaseFs().remove(filename);
     }
 
     @Override
     public void move(String filename, String destination) throws IOException {
-        fs.move(filename, destination);
+        getBaseFs().move(filename, destination);
     }
 
     @Override
     public boolean exists(String filename) throws IOException {
-        return fs.exists(filename);
+        return getBaseFs().exists(filename);
     }
 
     @Override
-    protected Optional<String> getUserPath(String realPath) {
-        return Optional.of(realPath);
+    protected String getUserPath(String realPath) {
+        return realPath;
     }
 
     private String getBackupPath(String path) {

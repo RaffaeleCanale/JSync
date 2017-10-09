@@ -32,27 +32,27 @@ public class CrypterFsFactory extends DecoratorFactory {
     private static final String KEY_ALGORITHM = "algorithm";
 
     @Override
-    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException {
+    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String prefix) throws IOException {
         try {
             Index localIndex = Main.getDataSets().getLocal().getIndex();
             Crypter crypter = getCrypter(options);
             StoredKeys keys = localIndex.get(STORED_KEY);
 
-            byte[] key = keys.getKey(path);
+            byte[] key = keys.getKey(prefix);
 
             if (key != null) {
                 crypter.initKey(key);
             } else {
-                char[] password = IN.readPassword("Input the remote password for " + path + ": ");
+                char[] password = IN.readPassword("Input the remote password for " + prefix + ": ");
                 crypter.generateKey(password, SALT);
 
                 if (localIndex.get(ENABLE_STORE_KEY)) {
-                    keys.put(path, crypter.getKey());
+                    keys.put(prefix, crypter.getKey());
                     localIndex.set(STORED_KEY, keys);
                 }
             }
 
-            return fs -> new CrypterFileSystem(path, fs, crypter);
+            return fs -> new CrypterFileSystem(fs, prefix, crypter);
         } catch (CryptoException e) {
             throw new IOException(e);
         }

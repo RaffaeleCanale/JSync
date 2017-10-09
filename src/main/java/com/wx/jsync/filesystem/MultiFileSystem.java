@@ -22,10 +22,10 @@ public class MultiFileSystem implements FileSystem {
         this.baseFs = new BaseFsWithView(baseFs);
     }
 
-    public void addDecorator(Function<FileSystem, DecoratorFileSystem> factory, String path) {
-        FileSystem parentFs = resolveFs(path);
+    public void addDecorator(Function<FileSystem, DecoratorFileSystem> factory, String prefix) {
+        FileSystem parentFs = resolveFs(prefix);
 
-        decorators.put(path, factory.apply(parentFs));
+        decorators.put(prefix, factory.apply(parentFs));
     }
 
     @Override
@@ -41,13 +41,14 @@ public class MultiFileSystem implements FileSystem {
         Collection<String> baseFiles = new ArrayList<>();
 
         for (String file : allFiles) {
-            Optional<String> decoratorPath = reverseResolve(file);
-            if (decoratorPath.isPresent()) {
-                decoratorFiles
-                        .computeIfAbsent(decoratorPath.get(), k -> new ArrayList<>())
-                        .add(file);
-            } else {
+            FileSystem fs = resolveFs(file);
+
+            if (fs == baseFs) {
                 baseFiles.add(file);
+            } else {
+                decoratorFiles
+                        .computeIfAbsent(((DecoratorFileSystem) fs).getPrefix(), k -> new ArrayList<>())
+                        .add(file);
             }
         }
 
@@ -99,37 +100,44 @@ public class MultiFileSystem implements FileSystem {
         return resolveFs(filename).exists(filename);
     }
 
-    private Optional<String> reverseResolve(String realpath) {
-        for (DecoratorFileSystem decorator : decorators.values()) {
-            if (decorator.resolvePath(realpath).isPresent()) {
-                return Optional.of(decorator.getPath());
-            }
-        }
+//    private Optional<String> reverseResolve(String realpath) {
+//        for (DecoratorFileSystem decorator : decorators.values()) {
+//            if (decorator.resolvePath(realpath).isPresent()) {
+//                return Optional.of(decorator.getPrefix());
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
 
-        return Optional.empty();
-    }
 
+//    private Optional<String> resolve(String userpath) {
+//        for (String path : decorators.keySet()) {
+//            if (userpath.startsWith(path)) {
+//                return Optional.of(path);
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
 
-    private Optional<String> resolve(String userpath) {
-        for (String path : decorators.keySet()) {
-            if (userpath.startsWith(path)) {
-                return Optional.of(path);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    public FileSystem reverseResolveFs(String filename) {
-        return reverseResolve(filename)
-                .map(path -> (FileSystem) decorators.get(path))
-                .orElse(baseFs);
-    }
+//    public FileSystem reverseResolveFs(String filename) {
+//        return reverseResolve(filename)
+//                .map(path -> (FileSystem) decorators.get(path))
+//                .orElse(baseFs);
+//    }
 
     public FileSystem resolveFs(String filename) {
-        return resolve(filename)
-                .map(path -> (FileSystem) decorators.get(path))
-                .orElse(baseFs);
+        for (String prefix : decorators.keySet()) {
+            if (filename.startsWith(prefix)) {
+                return decorators.get(prefix);
+            }
+        }
+
+        return baseFs;
+//        return resolve(filename)
+//                .map(path -> (FileSystem) decorators.get(path))
+//                .orElse(baseFs);
     }
 
     public FileSystem getBaseFs() {

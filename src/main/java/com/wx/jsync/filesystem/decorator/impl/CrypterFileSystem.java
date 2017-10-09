@@ -22,8 +22,8 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
 
     private final Crypter crypter;
 
-    public CrypterFileSystem(String path, FileSystem fs, Crypter crypter) {
-        super(path, fs);
+    public CrypterFileSystem(FileSystem baseFs, String prefix, Crypter crypter) {
+        super(baseFs, prefix);
         this.crypter = crypter;
     }
 

@@ -2,47 +2,47 @@ package com.wx.jsync.filesystem.decorator;
 
 import com.wx.jsync.filesystem.FileSystem;
 
-import java.util.Optional;
-
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
  * @version 0.1 - created on 01.10.17.
  */
 public abstract class DecoratorFileSystem implements FileSystem {
 
-    private final String path;
+    private final FileSystem baseFs;
+    private final String prefix;
 
-    public DecoratorFileSystem(String path) {
-        this.path = path;
+    public DecoratorFileSystem(FileSystem baseFs, String prefix) {
+        this.baseFs = baseFs;
+        this.prefix = prefix;
     }
 
-    public String getPath() {
-        return path;
+    public String getPrefix() {
+        return prefix;
     }
 
-    public abstract <E extends FileSystem> E getBaseFs();
+    public <E extends FileSystem> E getBaseFs() {
+        return (E) baseFs;
+    }
 
-    protected abstract Optional<String> getUserPath(String realPath);
+    protected abstract String getUserPath(String realPath);
 
-    private Optional<String> resolveUserPath(String realPath) {
+    public final String resolveUserPath(String realPath) {
+        checkPath(realPath);
+
         FileSystem baseFs = getBaseFs();
 
         if (baseFs instanceof DecoratorFileSystem) {
-            return ((DecoratorFileSystem) baseFs).resolveUserPath(realPath)
-                    .flatMap(this::getUserPath);
+            realPath = ((DecoratorFileSystem) baseFs).resolveUserPath(realPath);
         }
 
-        return this.getUserPath(realPath);
+        return getUserPath(realPath);
     }
 
-    public final Optional<String> resolvePath(String realPath) {
-        Optional<String> userPath = resolveUserPath(realPath);
-
-        if (userPath.isPresent() && userPath.get().startsWith(getPath())) {
-            return userPath;
+    protected final String checkPath(String path) {
+        if (!path.startsWith(prefix)) {
+            throw new AssertionError();
         }
 
-        return Optional.empty();
+        return path;
     }
-
 }

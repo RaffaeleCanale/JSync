@@ -15,23 +15,23 @@ import java.util.function.Function;
  */
 public abstract class DecoratorFactory {
 
-    public static final String KEY_PATH = "path";
+    public static final String KEY_PREFIX = "prefix";
 
     public Pair<Function<FileSystem, DecoratorFileSystem>, String> getFactory(Options options) throws IOException {
-        String path = options.get(KEY_PATH);
+        String prefix = options.get(KEY_PREFIX);
 
-        if (path == null || path.isEmpty()) {
-            path = "";
+        if (prefix == null || prefix.isEmpty()) {
+            prefix = "";
         }
 
-        return Pair.of(initDecorator(options, path), path);
+        return Pair.of(initDecorator(options, prefix), prefix);
     }
 
-    protected abstract Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException;
+    protected abstract Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String prefix) throws IOException;
 
-    public Options getOptions(String selector, ArgumentsSupplier args) {
-        if (selector != null && !selector.isEmpty()) {
-            return getOptions(args).with(KEY_PATH, selector);
+    public Options getOptions(String prefix, ArgumentsSupplier args) {
+        if (prefix != null && !prefix.isEmpty()) {
+            return getOptions(args).with(KEY_PREFIX, prefix);
         }
 
         return getOptions(args);

@@ -21,10 +21,10 @@ import java.util.function.Function;
 public class BackupFsFactory extends DecoratorFactory {
 
     @Override
-    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String path) throws IOException {
+    protected Function<FileSystem, DecoratorFileSystem> initDecorator(Options options, String prefix) throws IOException {
         String backupPath = getBackupPath(options);
 
-        return fs -> new BackupFileSystem(path, fs, backupPath);
+        return fs -> new BackupFileSystem(fs, prefix, backupPath);
     }
 
     @Override

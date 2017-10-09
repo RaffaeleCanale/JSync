@@ -19,75 +19,69 @@ import static com.wx.jsync.Constants.INDEX_FILE;
  */
 public abstract class AbstractRenameDecorator extends DecoratorFileSystem {
 
-    private final FileSystem fs;
 
-    public AbstractRenameDecorator(String path, FileSystem fs) {
-        super(path);
-        this.fs = fs;
-    }
-
-    @Override
-    public <E extends FileSystem> E getBaseFs() {
-        return (E) fs;
+    public AbstractRenameDecorator(FileSystem baseFs, String prefix) {
+        super(baseFs, prefix);
     }
 
     @Override
     public FileStat getFileStat(String filename) throws IOException {
-        return fs.getFileStat(realPath0(filename));
+        return getBaseFs().getFileStat(realPath0(filename));
     }
 
     @Override
     public Collection<String> getAllFiles() throws IOException {
-        return fs.getAllFiles().stream()
+        return getBaseFs().getAllFiles().stream()
                 .map(this::userPath0)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     @Override
     public InputStream read(String filename) throws IOException {
-        return fs.read(realPath0(filename));
+        return getBaseFs().read(realPath0(filename));
     }
 
     @Override
     public void write(String filename, InputStream input) throws IOException {
-        fs.write(realPath0(filename), input);
+        getBaseFs().write(realPath0(filename), input);
     }
 
     @Override
     public void remove(String filename) throws IOException {
-        fs.remove(realPath0(filename));
+        getBaseFs().remove(realPath0(filename));
     }
 
     @Override
     public void move(String filename, String destination) throws IOException {
-        fs.move(realPath0(filename), realPath0(destination));
+        getBaseFs().move(realPath0(filename), realPath0(destination));
     }
 
     @Override
     public boolean exists(String filename) throws IOException {
-        return fs.exists(realPath0(filename));
+        return getBaseFs().exists(realPath0(filename));
     }
 
     @Override
-    protected Optional<String> getUserPath(String realPath) {
-        return Optional.ofNullable(userPath0(realPath));
+    protected String getUserPath(String realPath) {
+        return userPath0(realPath);
     }
 
     private String userPath0(String filename) {
+        checkPath(filename);
         if (filename.equals(INDEX_FILE)) {
             return filename;
         }
 
-        return userPath(filename);
+        return checkPath(userPath(filename));
     }
 
     private String realPath0(String filename) {
+        checkPath(filename);
         if (filename.equals(INDEX_FILE)) {
             return filename;
         }
 
-        return realPath(filename);
+        return checkPath(realPath(filename));
     }
 
     protected abstract String userPath(String filename);

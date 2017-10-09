@@ -10,9 +10,7 @@ import com.wx.jsync.index.options.Options;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 
-import static com.wx.jsync.filesystem.decorator.factory.DecoratorFactory.KEY_PATH;
 import static com.wx.jsync.index.IndexKey.DECORATORS;
 import static com.wx.jsync.index.IndexKey.REMOTE;
 import static com.wx.jsync.util.DesktopUtils.getCwd;

@@ -57,19 +57,19 @@ public class Index {
 
 //    public void setValue(IndexKey key, NamedOptions<?> options) {
 //        JSONObject value = NamedOptionsLoader.create(options);
-//        JsonUtils.setValue(root, value, key.getPath());
+//        JsonUtils.setValue(root, value, key.getPrefix());
 //    }
 
 //    public void setValue(IndexKey key, Collection<?> value) {
-//        JsonUtils.setValue(root, value, key.getPath());
+//        JsonUtils.setValue(root, value, key.getPrefix());
 //    }
 //
 //    public void setValue(IndexKey key, Object value) {
-//        JsonUtils.setValue(root, value, key.getPath());
+//        JsonUtils.setValue(root, value, key.getPrefix());
 //    }
 //
 //    public String getString(IndexKey key) {
-//        return JsonUtils.getString(root, key.getPath());
+//        return JsonUtils.getString(root, key.getPrefix());
 //    }
 
     public <E> E get(IndexKey key) {
@@ -114,30 +114,30 @@ public class Index {
     }
 
 //    public Optional<String> getStringOpt(IndexKey key) {
-//        return JsonUtils.getStringOpt(root, key.getPath());
+//        return JsonUtils.getStringOpt(root, key.getPrefix());
 //    }
 //
 //    public Optional<List<String>> getStringListOpt(IndexKey key) {
-//        return JsonUtils.getStringListOpt(root, key.getPath());
+//        return JsonUtils.getStringListOpt(root, key.getPrefix());
 //    }
 //
 //    public Optional<JSONObject> getObjectOpt(IndexKey key) {
-//        return JsonUtils.getObjectOpt(root, key.getPath());
+//        return JsonUtils.getObjectOpt(root, key.getPrefix());
 //    }
 
 //    public void setFile(SyncFile file) {
-//        JsonUtils.set(root, file.getVersion(), "files", file.getPath(), "version");
-//        JsonUtils.set(root, file.getVersionAuthor(), "files", file.getPath(), "author");
+//        JsonUtils.set(root, file.getVersion(), "files", file.getPrefix(), "version");
+//        JsonUtils.set(root, file.getVersionAuthor(), "files", file.getPrefix(), "author");
 //
-//        file.getBaseVersion().ifPresent(bv -> JsonUtils.set(root, bv, "files", file.getPath(), "version_base"));
+//        file.getBaseVersion().ifPresent(bv -> JsonUtils.set(root, bv, "files", file.getPrefix(), "version_base"));
 //
 //        FileStat stat = file.getStat();
 //        if (stat.isRemoved()) {
-//            remove(root, "files", file.getPath(), "stat");
+//            remove(root, "files", file.getPrefix(), "stat");
 //        } else {
-//            JsonUtils.set(root, stat.getTimestamp(), "files", file.getPath(), "stat", "timestamp");
-//            JsonUtils.set(root, stat.getFileSize(), "files", file.getPath(), "stat", "size");
-//            JsonUtils.set(root, stat.getChecksum(), "files", file.getPath(), "stat", "checksum");
+//            JsonUtils.set(root, stat.getTimestamp(), "files", file.getPrefix(), "stat", "timestamp");
+//            JsonUtils.set(root, stat.getFileSize(), "files", file.getPrefix(), "stat", "size");
+//            JsonUtils.set(root, stat.getChecksum(), "files", file.getPrefix(), "stat", "checksum");
 //        }
 //    }
 
