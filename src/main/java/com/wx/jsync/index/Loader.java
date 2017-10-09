@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
@@ -37,16 +38,6 @@ public interface Loader<E> {
     Loader<Collection<SyncFile>> FILE_SET = new FilesLoader();
     Loader<Options> OPTIONS = new OptionsLoader();
 
-    static Loader<Boolean> BOOLEAN(boolean def) {
-        return new BooleanLoader() {
-            @Override
-            public Boolean load(JSONObject root, String... key) {
-                return loadOpt(root, key).orElse(def);
-            }
-        };
-    }
-
-
     Optional<E> loadOpt(JSONObject root, String[] key);
 
     default E load(JSONObject root, String... key) {
@@ -55,4 +46,44 @@ public interface Loader<E> {
     }
 
     void setValue(JSONObject root, E value, String... path);
+
+    default Loader<E> or(Supplier<E> defaultValue) {
+        return new Loader<E>() {
+
+            @Override
+            public E load(JSONObject root, String... key) {
+                return loadOpt(root, key).orElseGet(defaultValue);
+            }
+
+            @Override
+            public Optional<E> loadOpt(JSONObject root, String[] key) {
+                return Loader.this.loadOpt(root, key);
+            }
+
+            @Override
+            public void setValue(JSONObject root, E value, String... path) {
+                Loader.this.setValue(root, value, path);
+            }
+        };
+    }
+
+    default Loader<E> or(E defaultValue) {
+        return new Loader<E>() {
+
+            @Override
+            public E load(JSONObject root, String... key) {
+                return loadOpt(root, key).orElse(defaultValue);
+            }
+
+            @Override
+            public Optional<E> loadOpt(JSONObject root, String[] key) {
+                return Loader.this.loadOpt(root, key);
+            }
+
+            @Override
+            public void setValue(JSONObject root, E value, String... path) {
+                Loader.this.setValue(root, value, path);
+            }
+        };
+    }
 }

@@ -3,6 +3,7 @@ package com.wx.jsync.dataset.factory.impl;
 import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.io.file.FileUtil;
+import com.wx.jsync.GlobalConfig;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
@@ -27,7 +28,7 @@ public class LocalDataSetFactory extends DataSetFactory {
         if (fileSystem.exists(INDEX_FILE)) {
             index.load(fileSystem);
         } else {
-            index.create(fileSystem, DesktopUtils.getHostName());
+            index.create(fileSystem);
             index.save(fileSystem);
         }
 

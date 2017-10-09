@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static com.wx.jsync.Constants.INDEX_FILE;
+import static com.wx.jsync.index.IndexKey.OWNER;
 import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
 public abstract class DataSetFactory {
@@ -36,7 +37,8 @@ public abstract class DataSetFactory {
         } else {
             // TODO: 24.09.17 Better name?
             String author = "remote";
-            remoteIndex.create(remoteFs, author);
+            remoteIndex.create(remoteFs);
+            remoteIndex.set(OWNER, author);
             remoteIndex.set(PARTICIPANTS, Collections.singleton(author));
             remoteIndex.save(remoteFs);
         }

@@ -24,14 +24,12 @@ public class Index {
 
     private JSONObject root;
 
-    public void create(FileSystem fileSystem, String author) throws IOException {
+    public void create(FileSystem fileSystem) throws IOException {
         if (fileSystem.exists(INDEX_FILE)) {
             throw new IOException("Index already exists");
         }
 
         root = new JSONObject();
-
-        set(OWNER, author);
     }
 
     public void load(FileSystem fileSystem) throws IOException {

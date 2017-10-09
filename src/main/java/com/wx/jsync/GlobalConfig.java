@@ -5,6 +5,7 @@ import com.wx.crypto.CryptoException;
 import com.wx.crypto.cipher.AESCrypter;
 import com.wx.io.Accessor;
 import com.wx.io.file.FileUtil;
+import com.wx.jsync.util.DesktopUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 import static com.wx.jsync.Constants.GLOBAL_CONFIG_DIR;
 import static com.wx.jsync.Constants.SALT;
 import static com.wx.jsync.util.JsonUtils.getBytesOpt;
+import static com.wx.jsync.util.JsonUtils.getStringOpt;
 import static com.wx.jsync.util.JsonUtils.set;
 
 /**
@@ -88,5 +90,9 @@ public class GlobalConfig {
                 .setOut(configFile)) {
             accessor.pourInOut();
         }
+    }
+
+    public static String getOwner() {
+        return getStringOpt(config, "user").orElse(DesktopUtils.getHostName());
     }
 }
