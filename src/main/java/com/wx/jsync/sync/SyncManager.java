@@ -1,7 +1,6 @@
 package com.wx.jsync.sync;
 
 import com.wx.jsync.dataset.DataSet;
-import com.wx.jsync.index.IndexKey;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import com.wx.jsync.sync.tasks.SyncTask;
@@ -17,8 +16,8 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import static com.google.common.collect.Sets.union;
-import static com.wx.jsync.index.IndexKey.FILE_FILTER;
-import static com.wx.jsync.index.IndexKey.OWNER;
+import static com.wx.jsync.index.IndexKey.IGNORE;
+import static com.wx.jsync.index.IndexKey.USER;
 import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
 public class SyncManager {
@@ -36,8 +35,8 @@ public class SyncManager {
     public SyncManager(DataSet local, DataSet remote) throws IOException {
         this.local = local;
         this.remote = remote;
-        this.filter = local.getIndex().get(FILE_FILTER, Loader.FILTER)
-                .and(remote.getIndex().get(FILE_FILTER, Loader.FILTER));
+        this.filter = local.getIndex().get(IGNORE, Loader.FILTER)
+                .and(remote.getIndex().get(IGNORE, Loader.FILTER));
 
         updateRemote();
         purgeRemoved();
@@ -91,7 +90,7 @@ public class SyncManager {
 
     private void updateRemote() {
         Set<String> participants = union(
-                Collections.singleton(local.getIndex().get(OWNER)),
+                Collections.singleton(local.getIndex().get(USER)),
                 remote.getIndex().get(PARTICIPANTS)
         );
         remote.getIndex().set(PARTICIPANTS, participants);

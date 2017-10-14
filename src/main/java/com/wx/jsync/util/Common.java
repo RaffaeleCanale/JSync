@@ -4,7 +4,6 @@ package com.wx.jsync.util;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.action.arg.ObjectsSupplier;
 import com.wx.jsync.dataset.DataSetType;
-import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.util.representables.TypeCaster;
 import com.wx.util.representables.string.EnumCasterLC;
 
@@ -26,10 +25,6 @@ public class Common {
 
     public static DataSetType getDataSetType(String name) {
         return enumCaster(DataSetType.class).castOut(name);
-    }
-
-    public static DecoratorType getDecoratorTyoe(String name) {
-        return enumCaster(DecoratorType.class).castOut(name);
     }
 
     public static <E extends Enum<E>> TypeCaster<String, E> enumCaster(Class<E> cls) {

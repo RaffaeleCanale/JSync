@@ -1,5 +1,6 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
 import org.json.JSONObject;
 
@@ -22,5 +23,10 @@ public class StringLoader implements Loader<String> {
     @Override
     public void setValue(JSONObject root, String value, String[] path) {
         set(root, value, path);
+    }
+
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        set(root, args.supplyString(), path);
     }
 }

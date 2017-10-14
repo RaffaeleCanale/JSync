@@ -4,18 +4,19 @@ import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.index.Index;
+import com.wx.jsync.index.options.MutableOptions;
 import com.wx.jsync.index.options.Options;
 
 import java.io.IOException;
 import java.util.Collections;
 
 import static com.wx.jsync.Constants.INDEX_FILE;
-import static com.wx.jsync.index.IndexKey.OWNER;
+import static com.wx.jsync.index.IndexKey.USER;
 import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
 
 public abstract class DataSetFactory {
 
-    public final DataSet connect(Options options) throws IOException {
+    public final DataSet connect(MutableOptions options) throws IOException {
         FileSystem remoteFs = initFileSystem(options, false);
         Index remoteIndex = new Index();
 
@@ -28,7 +29,7 @@ public abstract class DataSetFactory {
         return new DataSet(remoteFs, remoteIndex);
     }
 
-    public final DataSet init(Options options) throws IOException {
+    public final DataSet init(MutableOptions options) throws IOException {
         FileSystem remoteFs = initFileSystem(options, true);
         Index remoteIndex = new Index();
 
@@ -38,7 +39,7 @@ public abstract class DataSetFactory {
             // TODO: 24.09.17 Better name?
             String author = "remote";
             remoteIndex.create(remoteFs);
-            remoteIndex.set(OWNER, author);
+            remoteIndex.set(USER, author);
             remoteIndex.set(PARTICIPANTS, Collections.singleton(author));
             remoteIndex.save(remoteFs);
         }
@@ -46,8 +47,8 @@ public abstract class DataSetFactory {
         return new DataSet(remoteFs, remoteIndex);
     }
 
-    public abstract Options parseConfig(ArgumentsSupplier args);
+    public abstract Options parseOptions(ArgumentsSupplier args);
 
-    protected abstract FileSystem initFileSystem(Options options, boolean create) throws IOException;
+    protected abstract FileSystem initFileSystem(MutableOptions options, boolean create) throws IOException;
 
 }

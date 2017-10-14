@@ -12,7 +12,6 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import static com.wx.jsync.index.IndexKey.FILES;
-import static com.wx.jsync.index.IndexKey.FILE_FILTER;
 import static com.wx.jsync.sync.tasks.SyncTask.Type.CONFLICT;
 
 public class SyncTasksAnalyzer {

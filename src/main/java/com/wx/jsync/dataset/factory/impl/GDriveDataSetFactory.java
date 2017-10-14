@@ -12,6 +12,7 @@ import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.base.GDriveFileSystem;
 import com.wx.jsync.filesystem.base.LocalFileSystem;
+import com.wx.jsync.index.options.MutableOptions;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
@@ -39,14 +40,14 @@ public class GDriveDataSetFactory extends DataSetFactory {
 
 
     @Override
-    public Options parseConfig(ArgumentsSupplier args) {
+    public Options parseOptions(ArgumentsSupplier args) {
         return new Options(ImmutableMap.of(
                 KEY_DIRECTORY, args.supplyString()
         ));
     }
 
     @Override
-    protected FileSystem initFileSystem(Options options, boolean create) throws IOException {
+    protected FileSystem initFileSystem(MutableOptions options, boolean create) throws IOException {
         initDriveService();
 
         String user = options.get(KEY_USER);
@@ -54,13 +55,12 @@ public class GDriveDataSetFactory extends DataSetFactory {
         String directory = options.get(KEY_DIRECTORY);
 
         Drive driveService;
-        boolean saveConfig = false;
 
         if (user == null) {
             Userinfoplus userInfo = DriveServiceFactory.getUserInfo(true);
             LOG.info("User authorized: " + userInfo.getName());
             user = userInfo.getName();
-            saveConfig = true;
+            options.set(KEY_USER, user);
         }
 
         driveService = DriveServiceFactory.getDriveService(false);
@@ -82,17 +82,7 @@ public class GDriveDataSetFactory extends DataSetFactory {
                 throw new FileNotFoundException(directory);
             }
 
-            saveConfig = true;
-        }
-
-        if (saveConfig) {
-            NamedOptions<DataSetType> remoteConfig = new NamedOptions<>(GDRIVE, new Options(ImmutableMap.of(
-                    KEY_DIRECTORY, directory,
-                    KEY_USER, user,
-                    KEY_ROOT_ID, rootId
-            )));
-
-            Main.getDataSets().getLocal().getIndex().set(REMOTE, remoteConfig);
+            options.set(KEY_ROOT_ID, rootId);
         }
 
         return new GDriveFileSystem(drive, rootId);
@@ -104,8 +94,7 @@ public class GDriveDataSetFactory extends DataSetFactory {
         }
 
         try {
-            LocalFileSystem localFs = Main.getDataSets().getLocal().getBaseFs();
-            java.io.File localDir = localFs.getFile(GOOGLE_DIR);
+            java.io.File localDir = new java.io.File(GlobalConfig.getSyncDirectory(), GOOGLE_DIR);
             java.io.File globalDir = GlobalConfig.getGoogleDir();
 
             if (!localDir.isDirectory() && globalDir.isDirectory()) {

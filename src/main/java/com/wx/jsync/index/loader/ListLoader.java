@@ -1,6 +1,7 @@
-package com.wx.jsync.index;
+package com.wx.jsync.index.loader;
 
-import com.wx.jsync.ListLoader;
+import com.wx.action.arg.ArgumentsSupplier;
+import com.wx.jsync.index.Loader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,15 +13,15 @@ import static com.wx.jsync.util.JsonUtils.set;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
- * @version 0.1 - created on 29.09.17.
+ * @version 0.1 - created on 08.10.17.
  */
-public abstract class SetLoader<E> extends ListLoader<E> {
+public abstract class ListLoader<E> implements Loader<Collection<E>> {
 
     @Override
     public Optional<Collection<E>> loadOpt(JSONObject root, String[] key) {
         return getArrayOpt(root, key)
                 .map(array -> {
-                    Set<E> result = new TreeSet<>(Comparator.comparing(this::getId));
+                    List<E> result = new ArrayList<>();
 
                     for (Object obj : array) {
                         result.add(load(obj));
@@ -30,10 +31,23 @@ public abstract class SetLoader<E> extends ListLoader<E> {
                 });
     }
 
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        JSONArray array = new JSONArray();
+
+        while (args.hasMore()) {
+            array.put(getUserValue(args));
+        }
+
+        set(root, array, path);
+    }
+
+    protected abstract Object getUserValue(ArgumentsSupplier args);
+
 
     @Override
     public Collection<E> load(JSONObject root, String[] key) {
-        return loadOpt(root, key).orElseGet(Collections::emptySet);
+        return loadOpt(root, key).orElseGet(Collections::emptyList);
     }
 
     @Override
@@ -53,63 +67,20 @@ public abstract class SetLoader<E> extends ListLoader<E> {
             array = new JSONArray();
         }
 
-        int i = findEntry(array, value);
-        if (i < 0) {
-            array.put(getValue(value));
-        } else {
-            array.put(i, getValue(value));
-        }
+        array.put(getValue(value));
 
         set(root, array, path);
     }
 
     public void removeSingleValue(JSONObject root, String[] path, E value) {
-        JSONArray array = getArrayOpt(root, path).orElse(null);
-
-        if (array != null) {
-            int i = findEntry(array, value);
-            if (i >= 0) {
-                array.remove(i);
-                set(root, array, path);
-            }
-        }
+        throw new UnsupportedOperationException();
     }
 
     public Optional<E> getSingleValue(JSONObject root, String[] path, String id) {
-        JSONArray array = getArrayOpt(root, path).orElse(null);
-
-        if (array != null) {
-            int i = findEntry(array, id);
-            if (i >= 0) {
-                return Optional.of(load(array.get(i)));
-            }
-        }
-
-        return Optional.empty();
+        throw new UnsupportedOperationException();
     }
-
-    private int findEntry(JSONArray array, E value) {
-        return findEntry(array, getId(value));
-    }
-
-    private int findEntry(JSONArray array, String id) {
-        for (int i = 0; i < array.length(); i++) {
-            E entry = load(array.get(i));
-
-            if (getId(entry).equals(id)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-
-    protected abstract String getId(E e);
 
     protected abstract E load(Object entry);
 
     protected abstract Object getValue(E value);
-
-
 }

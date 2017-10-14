@@ -1,16 +1,11 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.filesystem.FileStat;
-import com.wx.jsync.index.Loader;
-import com.wx.jsync.index.SetLoader;
 import com.wx.jsync.sync.SyncFile;
-import com.wx.jsync.util.JsonUtils;
 import org.json.JSONObject;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.wx.jsync.util.JsonUtils.*;
 
@@ -57,6 +52,11 @@ public class FilesLoader extends SetLoader<SyncFile> {
         }
 
         return obj;
+    }
+
+    @Override
+    protected Object getUserValue(ArgumentsSupplier args) {
+        throw new IllegalArgumentException("Cannot set value for files");
     }
 
     private Optional<FileStat> getStat(JSONObject fileObj) {

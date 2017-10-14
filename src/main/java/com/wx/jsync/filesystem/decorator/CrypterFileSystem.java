@@ -1,15 +1,11 @@
-package com.wx.jsync.filesystem.decorator.impl;
+package com.wx.jsync.filesystem.decorator;
 
 import com.wx.crypto.Crypter;
 import com.wx.crypto.CryptoException;
-import com.wx.jsync.filesystem.FileStat;
 import com.wx.jsync.filesystem.FileSystem;
-import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.ENCRYPTED_EXTENSION;
 import static com.wx.jsync.Constants.INDEX_FILE;
@@ -22,14 +18,14 @@ public class CrypterFileSystem extends AbstractRenameDecorator {
 
     private final Crypter crypter;
 
-    public CrypterFileSystem(FileSystem baseFs, String prefix, Crypter crypter) {
-        super(baseFs, prefix);
+    public CrypterFileSystem(FileSystem baseFs, Crypter crypter) {
+        super(baseFs);
         this.crypter = crypter;
     }
 
     @Override
     public String toString() {
-        return crypter.getAlgorithmName() + "[" + getBaseFs() + "]";
+        return crypter.getAlgorithmName() + "[" + super.toString() + "]";
     }
 
     @Override

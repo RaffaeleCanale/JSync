@@ -37,4 +37,8 @@ public class Options {
         return new Options(copy);
     }
 
+    public MutableOptions toMutable() {
+        return new MutableOptions(options);
+    }
+
 }

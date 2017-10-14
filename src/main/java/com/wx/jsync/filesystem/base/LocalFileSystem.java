@@ -2,6 +2,7 @@ package com.wx.jsync.filesystem.base;
 
 import com.wx.io.Accessor;
 import com.wx.io.file.FileUtil;
+import com.wx.jsync.GlobalConfig;
 import com.wx.jsync.filesystem.*;
 
 import java.io.*;
@@ -21,7 +22,12 @@ public class LocalFileSystem implements FileSystem {
     private final File directory;
 
     public LocalFileSystem(File directory) {
+        GlobalConfig.setSyncDirectory(directory);
         this.directory = directory;
+    }
+
+    public File getDirectory() {
+        return directory;
     }
 
     @Override

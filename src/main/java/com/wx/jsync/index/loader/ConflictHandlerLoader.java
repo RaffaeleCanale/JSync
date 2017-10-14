@@ -1,8 +1,10 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import com.wx.jsync.sync.conflict.impl.UserInputHandler;
+import com.wx.jsync.util.StringArgsSupplier;
 import org.json.JSONObject;
 
 import java.util.Optional;
@@ -30,6 +32,11 @@ public class ConflictHandlerLoader implements Loader<ConflictHandler> {
     @Override
     public void setValue(JSONObject root, ConflictHandler value, String[] path) {
         set(root, resolve(value), path);
+    }
+
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        set(root, resolve(args.supplyString()), path);
     }
 
     private ConflictHandler resolve(String name) {

@@ -5,13 +5,12 @@ import com.wx.console.UserConsoleInterface;
 import com.wx.console.system.UnixSystemConsole;
 import com.wx.jsync.util.Common;
 import com.wx.jsync.util.StringArgsSupplier;
+import com.wx.jsync.util.helpers.DataSetsHelper;
 import com.wx.util.log.LogHelper;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.wx.jsync.util.Common.EMPTY_ARGS;
-import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
 
 public class Main {
 
@@ -19,10 +18,10 @@ public class Main {
     public static final UserConsoleInterface IN = new UserConsoleInterface(new UnixSystemConsole(), "", "> ");
 
     static final DataSetsHelper dataSets = new DataSetsHelper();
-
-    public static DataSetsHelper getDataSets() {
-        return dataSets;
-    }
+//
+//    private static DataSetsHelper getDataSets() {
+//        return dataSets;
+//    }
 
     public static void main(String[] argv) {
         LogHelper.setupLogger(LogHelper.consoleHandler(Level.ALL));

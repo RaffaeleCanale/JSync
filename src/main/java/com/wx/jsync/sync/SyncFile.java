@@ -1,6 +1,7 @@
 package com.wx.jsync.sync;
 
 import com.wx.jsync.filesystem.FileStat;
+import com.wx.jsync.index.options.Options;
 
 import java.util.Optional;
 
@@ -54,4 +55,7 @@ public class SyncFile {
         return new SyncFile(path, stat, version, versionAuthor, version);
     }
 
+    public boolean isRemoved() {
+        return getStat().isRemoved();
+    }
 }

@@ -1,9 +1,8 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
-import com.wx.jsync.index.SetLoader;
 import com.wx.jsync.index.options.Options;
-import com.wx.jsync.util.JsonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,6 +25,11 @@ public class OptionsLoader implements Loader<Options> {
     @Override
     public Optional<Options> loadOpt(JSONObject root, String[] key) {
         return getObjectOpt(root, key).map(this::getOptions);
+    }
+
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.wx.jsync.index.loader;
 
 import com.google.common.collect.ImmutableMap;
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
-import com.wx.jsync.index.SetLoader;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.index.options.StoredKeys;
 import com.wx.util.representables.string.EncodedBytesRepr;
@@ -25,6 +25,11 @@ public class StoredKeysLoader implements Loader<StoredKeys> {
     @Override
     public StoredKeys load(JSONObject root, String... key) {
         return loadOpt(root, key).orElse(new KeysStore(null, new HashMap<>()));
+    }
+
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -75,6 +80,11 @@ public class StoredKeysLoader implements Loader<StoredKeys> {
 
 
     private class OptionsList extends SetLoader<Options> {
+
+        @Override
+        protected Object getUserValue(ArgumentsSupplier args) {
+            throw new UnsupportedOperationException();
+        }
 
         @Override
         protected String getId(Options options) {

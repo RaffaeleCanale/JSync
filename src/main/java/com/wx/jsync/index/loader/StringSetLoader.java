@@ -1,6 +1,6 @@
 package com.wx.jsync.index.loader;
 
-import com.wx.jsync.index.SetLoader;
+import com.wx.action.arg.ArgumentsSupplier;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
@@ -21,5 +21,10 @@ public class StringSetLoader extends SetLoader<String> {
     @Override
     protected Object getValue(String value) {
         return value;
+    }
+
+    @Override
+    protected Object getUserValue(ArgumentsSupplier args) {
+        return args.supplyString();
     }
 }

@@ -9,6 +9,7 @@ import com.wx.jsync.dataset.factory.DataSetFactory;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.base.LocalFileSystem;
 import com.wx.jsync.index.Index;
+import com.wx.jsync.index.options.MutableOptions;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.util.DesktopUtils;
 
@@ -36,14 +37,14 @@ public class LocalDataSetFactory extends DataSetFactory {
     }
 
     @Override
-    public Options parseConfig(ArgumentsSupplier args) {
+    public Options parseOptions(ArgumentsSupplier args) {
         String directory = args.supplyString();
 
         return new Options(ImmutableMap.of("directory", directory));
     }
 
     @Override
-    protected FileSystem initFileSystem(Options config, boolean create) throws IOException {
+    protected FileSystem initFileSystem(MutableOptions config, boolean create) throws IOException {
         File directory = getDirectory(config);
         if (create) {
             FileUtil.autoCreateDirectory(directory);
@@ -68,7 +69,7 @@ public class LocalDataSetFactory extends DataSetFactory {
         return new DataSet(fileSystem, index);
     }
 
-    private static File getDirectory(Options options) {
+    private static File getDirectory(MutableOptions options) {
         return new File((String) options.get("directory"));
     }
 

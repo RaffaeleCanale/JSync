@@ -11,17 +11,19 @@ import static com.wx.jsync.index.Loader.*;
  */
 public enum IndexKey {
 
-    REMOTE          (DATA_SET_OPTIONS,                     "remote"),
-    FILES           (FILE_SET,                             "files"),
-    OWNER           (STRING.or(GlobalConfig::getOwner),    "info", "owner"),
-    PARTICIPANTS    (STRING_SET,                           "info", "participants"),
-    STORED_KEY      (STORED_KEYS,                          "info", "key"),
-    ENABLE_STORE_KEY(BOOLEAN.or(DEFAULT_STORE_KEY),        "info", "options", "storeKey"),
-    FILE_FILTER     (FILTER,                               "info", "options", "ignore"),
-    ENABLE_BUMP     (BOOLEAN.or(DEFAULT_ENABLE_BUMP),      "info", "options", "executor", "useBump"),
-    ASK_CONFIRMATION(BOOLEAN.or(DEFAULT_ASK_CONFIRMATION), "info", "options", "executor", "askConfirmation"),
-    CONFLICT_HANDLER(HANDLER,                              "info", "options", "executor", "conflictHandler"),
-    DECORATORS      (DECORATOR_SET,                        "info", "options", "decorators"),
+    REMOTE              (REMOTE_OPTIONS,                          "remote"),
+    FILES               (FILE_SET,                                "files"),
+    USER                (STRING.or(GlobalConfig::getUser),       "info", "user"),
+    PARTICIPANTS        (STRING_SET,                              "info", "participants"),
+    ENABLE_BACKUP       (BOOLEAN.or(DEFAULT_ENABLE_BACKUP),       "info", "options", "backup", "enabled"),
+    BACKUP_DIRECTORY    (STRING.or(DEFAULT_BACKUP_DIR),           "info", "options", "backup", "directory"),
+    ENABLE_ENCRYPTION   (BOOLEAN.or(DEFAULT_ENABLE_ENCRYPTION),   "info", "options", "encryption", "enabled"),
+    ENCRYPTION_ALGORITHM(STRING.or(DEFAULT_ENCRYPTION_ALGORITHM), "info", "options", "encryption", "algorithm"),
+    IGNORE              (FILTER,                                  "info", "options", "ignore"),
+    ENABLE_BUMP         (BOOLEAN.or(DEFAULT_ENABLE_BUMP),         "info", "options", "executor", "useBump"),
+    ASK_CONFIRMATION    (BOOLEAN.or(DEFAULT_ASK_CONFIRMATION),    "info", "options", "executor", "askConfirmation"),
+    CONFLICT_HANDLER    (HANDLER,                                 "info", "options", "executor", "conflictHandler"),
+
 
 
     ;

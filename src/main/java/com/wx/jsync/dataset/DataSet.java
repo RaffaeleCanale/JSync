@@ -2,12 +2,12 @@ package com.wx.jsync.dataset;
 
 import com.wx.jsync.filesystem.FileStat;
 import com.wx.jsync.filesystem.FileSystem;
-import com.wx.jsync.filesystem.MultiFileSystem;
-import com.wx.jsync.filesystem.decorator.DecoratorFileSystem;
+import com.wx.jsync.filesystem.decorator.BackupFileSystem;
 import com.wx.jsync.index.Index;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.sync.diff.FsDiff;
 import com.wx.jsync.sync.diff.FsDiffFile;
+import com.wx.jsync.util.helpers.CrypterFileSystemHelper;
 import com.wx.util.log.LogHelper;
 
 import java.io.IOException;
@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -29,11 +28,21 @@ public class DataSet {
 
     private static final Logger LOG = LogHelper.getLogger(DataSet.class);
 
-    private final MultiFileSystem fileSystem;
+    private final FileSystem fileSystem;
     private final Index index;
 
-    public DataSet(FileSystem fileSystem, Index index) {
-        this.fileSystem = new MultiFileSystem(fileSystem);
+    public DataSet(FileSystem fileSystem, Index index) throws IOException {
+        if (index.get(ENABLE_ENCRYPTION)) {
+            String algorithm = index.get(ENCRYPTION_ALGORITHM);
+            fileSystem = CrypterFileSystemHelper.initDecorator(algorithm, fileSystem);
+        }
+
+        if (index.get(ENABLE_BACKUP)) {
+            String backupDirectory = index.get(BACKUP_DIRECTORY);
+            fileSystem = new BackupFileSystem(fileSystem, backupDirectory);
+        }
+
+        this.fileSystem = fileSystem;
         this.index = index;
     }
 
@@ -41,22 +50,13 @@ public class DataSet {
         return index;
     }
 
-    public MultiFileSystem getFileSystem() {
+    public FileSystem getFileSystem() {
         return fileSystem;
     }
 
-    public <E extends FileSystem> E getBaseFs() {
-        return (E) this.fileSystem.getBaseFs();
-    }
 
-    public DataSet addDecorator(Function<FileSystem, DecoratorFileSystem> factory, String path) {
-        fileSystem.addDecorator(factory, path);
-
-        return this;
-    }
-
-    public Collection<String> getAllFileSystemFiles() throws IOException {
-        return fileSystem.getAllFiles(index.get(FILE_FILTER)).stream()
+    private Collection<String> getAllFileSystemFiles() throws IOException {
+        return fileSystem.getAllFiles(index.get(IGNORE)).stream()
                 .filter(file -> !file.startsWith(CONFIG_DIR))
                 .collect(Collectors.toList());
     }
@@ -69,19 +69,20 @@ public class DataSet {
 
 
         for (SyncFile indexFile : indexFiles) {
-            if (fsFiles.remove(indexFile.getPath())) {
-                // File exists in FS
-                FileStat indexStat = indexFile.getStat();
-                FileStat fsStat = fileSystem.getFileStat(indexFile.getPath());
+            String path = indexFile.getPath();
 
-                if (indexStat.matches(fsStat)) {
+            if (fsFiles.remove(path)) {
+                // File exists in FS
+                FileStat fsStat = indexFile.getStat();
+
+                if (indexFile.getStat().matches(fsStat)) {
                     diffBuilder.addUnchanged(indexFile);
                 } else {
                     diffBuilder.addChanged(indexFile, fsStat);
                 }
             } else {
                 // File disappeared from FS
-                if (!indexFile.getStat().isRemoved()) {
+                if (!indexFile.isRemoved()) {
                     diffBuilder.addRemoved(indexFile);
                 }
             }
@@ -110,13 +111,7 @@ public class DataSet {
 
                 case CHANGED:
                     // Bump version
-                    index.setSingle(FILES, new SyncFile(
-                            path,
-                            diffFile.getFsStat(),
-                            bumpVersion(diffFile.getIndexFile().getVersion()),
-                            index.get(OWNER),
-                            diffFile.getIndexFile().getBaseVersion()
-                    ));
+                    index.setSingle(FILES, diffFile.getIndexFile().bumpBaseVersion());
                     changed++;
                     break;
 
@@ -126,7 +121,7 @@ public class DataSet {
                             path,
                             diffFile.getFsStat(),
                             VERSION_INCREMENT_DELTA,
-                            index.get(OWNER),
+                            index.get(USER),
                             Optional.empty()
                     ));
                     added++;
@@ -138,7 +133,7 @@ public class DataSet {
                             path,
                             FileStat.REMOVED,
                             bumpVersion(diffFile.getIndexFile().getVersion()),
-                            index.get(OWNER),
+                            index.get(USER),
                             diffFile.getIndexFile().getBaseVersion()
                     ));
                     removed++;
@@ -152,7 +147,7 @@ public class DataSet {
         int sum = added + removed + changed;
         if (sum > 0) {
             LOG.log(Level.INFO, "Commit {0} change(s) to {1} ({2} changed, {3} added, {4} removed)",
-                    new Object[]{sum, index.get(OWNER), changed, added, removed});
+                    new Object[]{sum, index.get(USER), changed, added, removed});
         }
 
         return sum > 0;

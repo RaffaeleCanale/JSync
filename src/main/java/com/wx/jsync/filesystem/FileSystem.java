@@ -32,4 +32,8 @@ public interface FileSystem {
 
     boolean exists(String filename) throws IOException;
 
+    default FileSystem getBase() {
+        return this;
+    }
+
 }

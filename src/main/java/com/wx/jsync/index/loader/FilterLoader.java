@@ -1,5 +1,6 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.util.Common;
 import org.json.JSONObject;
@@ -33,6 +34,11 @@ public class FilterLoader implements Loader<Predicate<String>> {
     @Override
     public Predicate<String> load(JSONObject root, String[] key) {
         return loadOpt(root, key).orElse(FilterLoader.alwaysTrue());
+    }
+
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        Loader.STRING_LIST.userSet(root, args, path);
     }
 
     private static Predicate<String> createFilter(List<String> list) {

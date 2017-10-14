@@ -1,5 +1,6 @@
 package com.wx.jsync.index.loader;
 
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
@@ -37,7 +38,10 @@ public class NamedOptionsLoader<E extends Enum<E>> implements Loader<NamedOption
         set(root, create(value), path);
     }
 
-
+    @Override
+    public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+        throw new UnsupportedOperationException();
+    }
 
     private E resolveType(JSONObject remoteObj) {
         String typeName = getString(remoteObj, "type");

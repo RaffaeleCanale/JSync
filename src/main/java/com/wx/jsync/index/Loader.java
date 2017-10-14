@@ -1,11 +1,8 @@
 package com.wx.jsync.index;
 
-import com.wx.jsync.ListLoader;
+import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.dataset.DataSetType;
-import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.loader.*;
-import com.wx.jsync.index.loader.StoredKeysLoader;
-import com.wx.jsync.index.loader.StringSetLoader;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
 import com.wx.jsync.index.options.StoredKeys;
@@ -15,7 +12,6 @@ import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -30,8 +26,7 @@ public interface Loader<E> {
     ListLoader<String> STRING_SET = new StringSetLoader();
     ListLoader<String> STRING_LIST = new StringListLoader();
 
-    Loader<NamedOptions<DataSetType>> DATA_SET_OPTIONS = new NamedOptionsLoader<>(DataSetType.class);
-    Loader<Collection<NamedOptions<DecoratorType>>> DECORATOR_SET = new DecoratorSetLoader();
+    Loader<NamedOptions<DataSetType>> REMOTE_OPTIONS = new NamedOptionsLoader<>(DataSetType.class);
     Loader<StoredKeys> STORED_KEYS = new StoredKeysLoader();
     Loader<Predicate<String>> FILTER = new FilterLoader();
     Loader<ConflictHandler> HANDLER = new ConflictHandlerLoader();
@@ -46,6 +41,8 @@ public interface Loader<E> {
     }
 
     void setValue(JSONObject root, E value, String... path);
+
+    void userSet(JSONObject root, ArgumentsSupplier args, String... path);
 
     default Loader<E> or(Supplier<E> defaultValue) {
         return new Loader<E>() {
@@ -63,6 +60,11 @@ public interface Loader<E> {
             @Override
             public void setValue(JSONObject root, E value, String... path) {
                 Loader.this.setValue(root, value, path);
+            }
+
+            @Override
+            public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+                Loader.this.userSet(root, args, path);
             }
         };
     }
@@ -83,6 +85,11 @@ public interface Loader<E> {
             @Override
             public void setValue(JSONObject root, E value, String... path) {
                 Loader.this.setValue(root, value, path);
+            }
+
+            @Override
+            public void userSet(JSONObject root, ArgumentsSupplier args, String... path) {
+                Loader.this.userSet(root, args, path);
             }
         };
     }

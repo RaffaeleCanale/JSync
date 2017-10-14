@@ -5,6 +5,10 @@ import com.wx.crypto.CryptoException;
 import com.wx.crypto.cipher.AESCrypter;
 import com.wx.io.Accessor;
 import com.wx.io.file.FileUtil;
+import com.wx.jsync.dataset.DataSet;
+import com.wx.jsync.filesystem.base.LocalFileSystem;
+import com.wx.jsync.index.Loader;
+import com.wx.jsync.index.options.StoredKeys;
 import com.wx.jsync.util.DesktopUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -14,9 +18,7 @@ import java.util.Optional;
 
 import static com.wx.jsync.Constants.GLOBAL_CONFIG_DIR;
 import static com.wx.jsync.Constants.SALT;
-import static com.wx.jsync.util.JsonUtils.getBytesOpt;
-import static com.wx.jsync.util.JsonUtils.getStringOpt;
-import static com.wx.jsync.util.JsonUtils.set;
+import static com.wx.jsync.util.JsonUtils.*;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)
@@ -27,8 +29,43 @@ public class GlobalConfig {
     private static final File GLOBAL_DIR = new File(GLOBAL_CONFIG_DIR);
     private static JSONObject config;
 
+    private static File syncDirectory;
+
+    public static void setSyncDirectory(File syncDirectory) {
+        GlobalConfig.syncDirectory = syncDirectory;
+    }
+
+    public static File getSyncDirectory() {
+        return syncDirectory;
+    }
+
     public static File getGoogleDir() {
         return new File(GLOBAL_DIR, "google");
+    }
+
+    public static Optional<byte[]> getStoredKey() throws IOException {
+        String path = getKeyPath();
+
+        StoredKeys storedKeys = Loader.STORED_KEYS.load(getConfig(), "stored_keys");
+        return Optional.ofNullable(storedKeys.getKey(path));
+    }
+
+    private static String getKeyPath() throws IOException {
+        return syncDirectory.getAbsolutePath();
+    }
+
+    public static void storeKey(byte[] key) throws IOException {
+        Boolean enabledStoredKeys = getBooleanOpt(config, "enabled_stored_keys").orElse(false);
+        if (!enabledStoredKeys) {
+            return;
+        }
+
+        String keyPath = getKeyPath();
+        StoredKeys storedKeys = Loader.STORED_KEYS.load(getConfig(), "stored_keys");
+
+        storedKeys.put(keyPath, key);
+        Loader.STORED_KEYS.setValue(config, storedKeys, "stored_keys");
+        saveConfig();
     }
 
     public static InputStream getClientSecret() throws IOException {
@@ -92,7 +129,11 @@ public class GlobalConfig {
         }
     }
 
-    public static String getOwner() {
-        return getStringOpt(config, "user").orElse(DesktopUtils.getHostName());
+    public static String getUser() {
+        try {
+            return getStringOpt(getConfig(), "user").orElse(DesktopUtils.getHostName());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

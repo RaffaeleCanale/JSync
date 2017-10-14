@@ -1,6 +1,7 @@
 package com.wx.jsync.index;
 
-import com.wx.jsync.ListLoader;
+import com.wx.action.arg.ArgumentsSupplier;
+import com.wx.jsync.index.loader.ListLoader;
 import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.util.JsonUtils;
@@ -38,7 +39,7 @@ public class Index {
 
             // Remove ignored files
             Collection<SyncFile> files = get(FILES);
-            Predicate<String> fileFilter = get(FILE_FILTER);
+            Predicate<String> fileFilter = get(IGNORE);
             for (SyncFile file : files) {
                 if (!fileFilter.test(file.getPath())) {
                     removeSingle(FILES, file);
@@ -71,6 +72,10 @@ public class Index {
 //    public String getString(IndexKey key) {
 //        return JsonUtils.getString(root, key.getPrefix());
 //    }
+
+    public void userSet(IndexKey key, ArgumentsSupplier args) {
+        key.getLoader().userSet(root, args, key.getPath());
+    }
 
     public <E> E get(IndexKey key) {
         return get(key, (Loader<E>) key.getLoader());

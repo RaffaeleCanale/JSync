@@ -1,22 +1,16 @@
 package com.wx.jsync;
 
 import com.wx.jsync.dataset.DataSet;
-import com.wx.jsync.dataset.DataSetType;
-import com.wx.jsync.dataset.factory.impl.LocalDataSetFactory;
-import com.wx.jsync.filesystem.decorator.factory.DecoratorType;
 import com.wx.jsync.index.Index;
-import com.wx.jsync.index.options.NamedOptions;
-import com.wx.jsync.index.options.Options;
 import com.wx.jsync.sync.SyncManager;
 import com.wx.jsync.sync.tasks.SyncTasksExecutor;
 import com.wx.jsync.sync.tasks.impl.ConfirmExecutor;
 import com.wx.jsync.sync.tasks.impl.DefaultExecutor;
+import com.wx.jsync.util.helpers.DataSetsHelper;
 
 import java.io.IOException;
-import java.util.Set;
 
 import static com.wx.jsync.index.IndexKey.*;
-import static com.wx.jsync.util.DesktopUtils.getCwd;
 
 /**
  * @author Raffaele Canale (<a href="mailto:raffaelecanale@gmail.com?subject=JSync">raffaelecanale@gmail.com</a>)

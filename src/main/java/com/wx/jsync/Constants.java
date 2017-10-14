@@ -11,10 +11,11 @@ public class Constants {
     public static final String GOOGLE_DIR = CONFIG_DIR + "google/";
 
 
+    public static final String DEFAULT_ENCRYPTION_ALGORITHM = "AES";
     public static final boolean DEFAULT_ENABLE_BUMP = true;
-    public static final boolean DEFAULT_USE_BACKUP = false;
+    public static final boolean DEFAULT_ENABLE_BACKUP = false;
+    public static final boolean DEFAULT_ENABLE_ENCRYPTION = false;
     public static final boolean DEFAULT_ASK_CONFIRMATION = true;
-    public static final boolean DEFAULT_STORE_KEY = true;
 
     public static final byte[] SALT = "b^7i+FH{;J`F%rz^VYcfX}~N+w|P^=3;oDc7=o>d0-3|p|g8enW/``MDG/ R.}U{".getBytes();
     public static final String ENCRYPTED_EXTENSION = ".wxc";
