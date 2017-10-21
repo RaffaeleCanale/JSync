@@ -13,8 +13,8 @@ public enum IndexKey {
 
     REMOTE              (REMOTE_OPTIONS,                          "remote"),
     FILES               (FILE_SET,                                "files"),
-    USER                (STRING.or(GlobalConfig::getUser),       "info", "user"),
-    PARTICIPANTS        (STRING_SET,                              "info", "participants"),
+    USER                (STRING.or(GlobalConfig::getUser),        "info", "user"),
+    PARTICIPANTS        (OPTIONS,                                 "info", "participants"),
     ENABLE_BACKUP       (BOOLEAN.or(DEFAULT_ENABLE_BACKUP),       "info", "options", "backup", "enabled"),
     BACKUP_DIRECTORY    (STRING.or(DEFAULT_BACKUP_DIR),           "info", "options", "backup", "directory"),
     ENABLE_ENCRYPTION   (BOOLEAN.or(DEFAULT_ENABLE_ENCRYPTION),   "info", "options", "encryption", "enabled"),

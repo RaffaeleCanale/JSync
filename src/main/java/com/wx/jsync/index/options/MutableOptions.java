@@ -26,20 +26,24 @@ public class MutableOptions {
         return (E) options.getOrDefault(key, def);
     }
 
-    public void set(String key, Object value) {
+    public MutableOptions set(String key, Object value) {
         if (!Objects.equals(options.get(key), value)) {
             hasChanged = true;
         }
 
         options.put(key, value);
+
+        return this;
     }
 
-    public void remote(String key) {
+    public MutableOptions remove(String key) {
         Object oldValue = options.remove(key);
 
         if (oldValue != null) {
             hasChanged = true;
         }
+
+        return this;
     }
 
     public boolean hasChanged() {

@@ -2,6 +2,7 @@ package com.wx.jsync.sync;
 
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.index.Loader;
+import com.wx.jsync.index.options.Options;
 import com.wx.jsync.sync.conflict.ConflictHandler;
 import com.wx.jsync.sync.tasks.SyncTask;
 import com.wx.jsync.sync.tasks.SyncTasks;
@@ -15,6 +16,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Sets.newCopyOnWriteArraySet;
 import static com.google.common.collect.Sets.union;
 import static com.wx.jsync.index.IndexKey.IGNORE;
 import static com.wx.jsync.index.IndexKey.USER;
@@ -89,12 +92,19 @@ public class SyncManager {
     }
 
     private void updateRemote() {
-        Set<String> participants = union(
-                Collections.singleton(local.getIndex().get(USER)),
-                remote.getIndex().get(PARTICIPANTS)
-        );
-        remote.getIndex().set(PARTICIPANTS, participants);
+        Options participants = remote.getIndex().get(PARTICIPANTS);
+        String user = local.getIndex().get(USER);
 
+        if (!participants.has(user)) {
+            int userId = participants.get("last_id", 0) + 1;
+
+            participants = participants.toMutable()
+                    .set(user, userId)
+                    .set("last_id", userId)
+                    .toOptions();
+
+            remote.getIndex().set(PARTICIPANTS, participants);
+        }
     }
 
     private void purgeRemoved() {

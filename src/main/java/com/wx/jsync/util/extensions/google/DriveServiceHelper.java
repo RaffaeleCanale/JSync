@@ -107,4 +107,18 @@ public class DriveServiceHelper {
         service.files().delete(id).execute();
     }
 
+    public File moveFile(String id, String parentId, String name) throws IOException {
+        File file = service.files().get(id)
+                .setFields(FILE_FIELDS)
+                .execute();
+
+        String previousParents = String.join(",", file.getParents());
+        String newParents = parentId;
+
+        return service.files().update(id, new File().setName(name))
+                .setRemoveParents(previousParents)
+                .setAddParents(newParents)
+                .setFields(FILE_FIELDS)
+                .execute();
+    }
 }

@@ -1,5 +1,6 @@
 package com.wx.jsync.dataset.factory;
 
+import com.google.common.collect.ImmutableMap;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.filesystem.FileSystem;
@@ -40,7 +41,10 @@ public abstract class DataSetFactory {
             String author = "remote";
             remoteIndex.create(remoteFs);
             remoteIndex.set(USER, author);
-            remoteIndex.set(PARTICIPANTS, Collections.singleton(author));
+            remoteIndex.set(PARTICIPANTS, new Options(ImmutableMap.of(
+                    author, 1,
+                    "last_id", 1
+            )));
             remoteIndex.save(remoteFs);
         }
 

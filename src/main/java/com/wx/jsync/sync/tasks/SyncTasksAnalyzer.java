@@ -4,48 +4,58 @@ import com.wx.jsync.dataset.DataSet;
 import com.wx.jsync.sync.SyncFile;
 import com.wx.util.log.LogHelper;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.wx.jsync.index.IndexKey.FILES;
+import static com.wx.jsync.index.IndexKey.USER;
 import static com.wx.jsync.sync.tasks.SyncTask.Type.CONFLICT;
+import static com.wx.jsync.util.Common.filter;
 
 public class SyncTasksAnalyzer {
 
     private static final Logger LOG = LogHelper.getLogger(SyncTasksAnalyzer.class);
 
     private final boolean enableBump;
-    private final Predicate<String> acceptFilter;
+    private final Predicate<SyncFile> acceptFilter;
 
     public SyncTasksAnalyzer(boolean enableBump, Predicate<String> filter) {
         this.enableBump = enableBump;
-        this.acceptFilter = filter;
+        this.acceptFilter = file -> filter.test(file.getUserPath());
     }
 
     public SyncTasks.Builder computeTasks(DataSet local, DataSet remote) {
         SyncTasks.Builder builder = new SyncTasks.Builder(enableBump);
 
+        Collection<SyncFile> localFiles = filter(
+                local.getIndex().get(FILES),
+                acceptFilter
+        );
+        Map<String, SyncFile> remoteFiles = filter(
+                remote.getIndex().get(FILES),
+                acceptFilter.and(canViewPredicate(local.getIndex().get(USER)))
+        ).stream().collect(Collectors.toMap(
+                SyncFile::getUserPath,
+                Function.identity()
+        ));
+
         Set<String> visitedFiles = new HashSet<>();
 
-        Collection<SyncFile> localFiles = local.getIndex().get(FILES);
+
         for (SyncFile localFile : localFiles) {
-            if (acceptFilter.test(localFile.getPath())) {
-                Optional<SyncFile> remoteFile = remote.getIndex().getSingle(FILES, localFile.getPath());
+            Optional<SyncFile> remoteFile = Optional.ofNullable(remoteFiles.get(localFile.getUserPath()));
 
-                visitedFiles.add(localFile.getPath());
+            visitedFiles.add(localFile.getUserPath());
 
-                addTask(builder, localFile, remoteFile);
-            }
+            addTask(builder, localFile, remoteFile);
         }
 
 
-        Collection<SyncFile> remoteFiles = remote.getIndex().get(FILES);
-        for (SyncFile remoteFile : remoteFiles) {
-            if (!visitedFiles.contains(remoteFile.getPath()) && acceptFilter.test(remoteFile.getPath())) {
+        for (SyncFile remoteFile : remoteFiles.values()) {
+            if (!visitedFiles.contains(remoteFile.getUserPath())) {
                 builder.updateLocal(Optional.empty(), remoteFile);
             }
         }
@@ -53,6 +63,11 @@ public class SyncTasksAnalyzer {
         return builder;
 
     }
+
+    private Predicate<SyncFile> canViewPredicate(String user) {
+        return file -> file.canView(user);
+    }
+
 
     private void addTask(SyncTasks.Builder builder, SyncFile localFile, Optional<SyncFile> remoteFileOpt) {
             /*

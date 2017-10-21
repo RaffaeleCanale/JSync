@@ -5,6 +5,7 @@ import com.wx.jsync.filesystem.FileSystem;
 import com.wx.jsync.filesystem.decorator.BackupFileSystem;
 import com.wx.jsync.index.Index;
 import com.wx.jsync.sync.SyncFile;
+import com.wx.jsync.sync.SyncFileBuilder;
 import com.wx.jsync.sync.diff.FsDiff;
 import com.wx.jsync.sync.diff.FsDiffFile;
 import com.wx.jsync.util.helpers.CrypterFileSystemHelper;
@@ -13,7 +14,6 @@ import com.wx.util.log.LogHelper;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.CONFIG_DIR;
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
+import static com.wx.jsync.filesystem.FileStat.REMOVED;
 import static com.wx.jsync.index.IndexKey.*;
 import static com.wx.jsync.util.Common.bumpVersion;
 
@@ -69,7 +70,7 @@ public class DataSet {
 
 
         for (SyncFile indexFile : indexFiles) {
-            String path = indexFile.getPath();
+            String path = indexFile.getRealPath();
 
             if (fsFiles.remove(path)) {
                 // File exists in FS
@@ -117,25 +118,22 @@ public class DataSet {
 
                 case ADDED:
                     //  Add fresh
-                    index.setSingle(FILES, new SyncFile(
-                            path,
-                            diffFile.getFsStat(),
-                            VERSION_INCREMENT_DELTA,
-                            index.get(USER),
-                            Optional.empty()
-                    ));
+                    index.setSingle(FILES, new SyncFileBuilder(path)
+                            .setStat(diffFile.getFsStat())
+                            .setVersion(VERSION_INCREMENT_DELTA)
+                            .setVersionAuthor(index.get(USER))
+                            .create()
+                    );
                     added++;
                     break;
 
                 case REMOVED:
                     // Set 'removed' + bumpVersion version
-                    index.setSingle(FILES, new SyncFile(
-                            path,
-                            FileStat.REMOVED,
-                            bumpVersion(diffFile.getIndexFile().getVersion()),
-                            index.get(USER),
-                            diffFile.getIndexFile().getBaseVersion()
-                    ));
+                    index.setSingle(FILES, diffFile.getIndexFile().builder()
+                            .setStat(REMOVED)
+                            .setVersionAuthor(index.get(USER))
+                            .create()
+                    );
                     removed++;
                     break;
 

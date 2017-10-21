@@ -28,19 +28,19 @@ public class FsDiff {
         private final Map<String, FsDiffFile> diffFiles = new HashMap<>();
 
         public Builder addUnchanged(SyncFile indexFile) {
-            diffFiles.put(indexFile.getPath(), new UnchangedFile(indexFile));
+            diffFiles.put(indexFile.getRealPath(), new UnchangedFile(indexFile));
 
             return this;
         }
 
         public Builder addChanged(SyncFile indexFile, FileStat fsStat) {
-            diffFiles.put(indexFile.getPath(), new ChangedFile(indexFile, fsStat));
+            diffFiles.put(indexFile.getRealPath(), new ChangedFile(indexFile, fsStat));
 
             return this;
         }
 
         public Builder addRemoved(SyncFile indexFile) {
-            diffFiles.put(indexFile.getPath(), new RemovedFile(indexFile));
+            diffFiles.put(indexFile.getRealPath(), new RemovedFile(indexFile));
 
             return this;
         }

@@ -47,8 +47,8 @@ public class SyncTask {
         return remoteFile;
     }
 
-    public String getPath() {
-        return localFile == null ? remoteFile.getPath() : localFile.getPath();
+    public String getUserPath() {
+        return localFile == null ? remoteFile.getUserPath() : localFile.getUserPath();
     }
 
     private static SyncFile validateLocal(Type type, SyncFile localFile) {

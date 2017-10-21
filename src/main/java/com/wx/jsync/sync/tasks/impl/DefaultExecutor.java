@@ -11,24 +11,25 @@ import java.io.IOException;
  */
 public class DefaultExecutor extends SyncTasksExecutor {
 
+
     @Override
-    public void pull(FileSystem localFs, FileSystem remoteFs, String path) throws IOException {
-        localFs.write(path, remoteFs.read(path));
+    public void pull(FileSystem localFs, FileSystem remoteFs, String localPath, String remotePath) throws IOException {
+        localFs.write(localPath, remoteFs.read(remotePath));
     }
 
     @Override
-    public void push(FileSystem localFs, FileSystem remoteFs, String path) throws IOException {
-        remoteFs.write(path, localFs.read(path));
+    public void push(FileSystem localFs, FileSystem remoteFs, String localPath, String remotePath) throws IOException {
+        remoteFs.write(remotePath, localFs.read(localPath));
     }
 
     @Override
-    public void removeLocal(FileSystem localFs, String path) throws IOException {
-        localFs.remove(path);
+    public void removeLocal(FileSystem localFs, String localPath) throws IOException {
+        localFs.remove(localPath);
     }
 
     @Override
-    public void removeRemote(FileSystem remoteFs, String path) throws IOException {
-        remoteFs.remove(path);
+    public void removeRemote(FileSystem remoteFs, String remotePath) throws IOException {
+        remoteFs.remove(remotePath);
     }
 
 }

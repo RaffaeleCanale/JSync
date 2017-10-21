@@ -5,8 +5,6 @@ import com.wx.crypto.CryptoException;
 import com.wx.crypto.cipher.AESCrypter;
 import com.wx.io.Accessor;
 import com.wx.io.file.FileUtil;
-import com.wx.jsync.dataset.DataSet;
-import com.wx.jsync.filesystem.base.LocalFileSystem;
 import com.wx.jsync.index.Loader;
 import com.wx.jsync.index.options.StoredKeys;
 import com.wx.jsync.util.DesktopUtils;

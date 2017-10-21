@@ -29,7 +29,7 @@ public class UserInputHandler implements ConflictHandler {
                 getRow("Remote", remote)
         };
 
-        printWithColors(IN.getConsole(), "Conflict detected for {Red}" + local.getPath() + "{}\n\n" +
+        printWithColors(IN.getConsole(), "Conflict detected for {Red}" + local.getUserPath() + "{}\n\n" +
                 formatTable(table) + "\n\n" +
                 "Choose which version you want to {b}keep{}:\n" +
                 "({b}l{}ocal/{b}r{}emote/{b}i{}gnore/{b}c{}ancel)");
@@ -43,7 +43,7 @@ public class UserInputHandler implements ConflictHandler {
                 tasks.updateLocal(Optional.empty(), remote);
                 return true;
             case 2:
-                printWithColors(IN.getConsole(), "{Yellow}{b}" + local.getPath() + "{}{Yellow} ignored{}");
+                printWithColors(IN.getConsole(), "{Yellow}{b}" + local.getUserPath() + "{}{Yellow} ignored{}");
                 return true;
             default:
                 return false;

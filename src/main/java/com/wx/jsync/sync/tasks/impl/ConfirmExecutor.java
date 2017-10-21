@@ -32,13 +32,13 @@ public class ConfirmExecutor extends SyncTasksExecutor {
     }
 
     @Override
-    public void pull(FileSystem localFs, FileSystem remoteFs, String path) throws IOException {
-        executor.pull(localFs, remoteFs, path);
+    public void pull(FileSystem localFs, FileSystem remoteFs, String localPath, String remotePath) throws IOException {
+        executor.pull(localFs, remoteFs, localPath, remotePath);
     }
 
     @Override
-    public void push(FileSystem localFs, FileSystem remoteFs, String path) throws IOException {
-        executor.push(localFs, remoteFs, path);
+    public void push(FileSystem localFs, FileSystem remoteFs, String localPath, String remotePath) throws IOException {
+        executor.push(localFs, remoteFs, localPath, remotePath);
     }
 
     @Override

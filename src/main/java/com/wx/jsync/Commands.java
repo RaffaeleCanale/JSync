@@ -7,18 +7,24 @@ import com.wx.jsync.index.IndexKey;
 import com.wx.jsync.index.options.MutableOptions;
 import com.wx.jsync.index.options.NamedOptions;
 import com.wx.jsync.index.options.Options;
+import com.wx.jsync.sync.SyncFile;
 import com.wx.jsync.util.Common;
+import com.wx.jsync.util.ViewHelper;
 import com.wx.jsync.util.extensions.google.DriveServiceFactory;
 import com.wx.util.representables.TypeCaster;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.wx.jsync.Main.dataSets;
 import static com.wx.jsync.SyncHelper.initSyncManager;
+import static com.wx.jsync.index.IndexKey.FILES;
+import static com.wx.jsync.index.IndexKey.PARTICIPANTS;
+import static com.wx.jsync.index.IndexKey.USER;
 import static com.wx.jsync.util.Common.*;
 
 /**
@@ -180,6 +186,23 @@ public enum Commands {
 
             target.saveIndex();
         }
+    },
+    SET_VIEW {
+        @Override
+        public String usage(ArgumentsSupplier args) {
+            return "<path>";
+        }
+
+        @Override
+        public void execute(ArgumentsSupplier args) throws IOException {
+            String path = args.supplyString();
+            String user = dataSets.getLocal().getIndex().get(USER);
+            DataSet remote = dataSets.getRemote();
+
+            ViewHelper helper = new ViewHelper(remote, user);
+            helper.addViewTo(path);
+        }
+
     },
     ;
 

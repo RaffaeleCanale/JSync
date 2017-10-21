@@ -3,8 +3,10 @@ package com.wx.jsync.index.loader;
 import com.wx.action.arg.ArgumentsSupplier;
 import com.wx.jsync.filesystem.FileStat;
 import com.wx.jsync.sync.SyncFile;
+import com.wx.jsync.sync.SyncFileBuilder;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import static com.wx.jsync.util.JsonUtils.*;
@@ -18,7 +20,7 @@ public class FilesLoader extends SetLoader<SyncFile> {
 
     @Override
     protected String getId(SyncFile file) {
-        return file.getPath();
+        return file.getRealPath();
     }
 
     @Override
@@ -26,13 +28,16 @@ public class FilesLoader extends SetLoader<SyncFile> {
         JSONObject obj = (JSONObject) entry;
         FileStat stat = getStat(obj).orElse(FileStat.REMOVED);
 
-        return new SyncFile(
-                getString(obj, "path"),
-                stat,
-                getDouble(obj, "version"),
-                getString(obj, "author"),
-                getDoubleOpt(obj, "version_base")
-        );
+        String realPath = getString(obj, "path");
+        String userPath = getStringOpt(obj, "user_path").orElse(realPath);
+
+        return new SyncFileBuilder(userPath, realPath)
+                .setStat(stat)
+                .setVersion(getDouble(obj, "version"))
+                .setVersionAuthor(getString(obj, "author"))
+                .setBaseVersion(getDoubleOpt(obj, "version_base"))
+                .setCanViewUsers(getStringListOpt(obj, "can_view"))
+                .create();
     }
 
     @Override
@@ -40,7 +45,17 @@ public class FilesLoader extends SetLoader<SyncFile> {
         JSONObject obj = new JSONObject();
         set(obj, file.getVersion(), "version");
         set(obj, file.getVersionAuthor(), "author");
-        set(obj, file.getPath(), "path");
+        set(obj, file.getRealPath(), "path");
+
+        Collection<String> canViewUsers = file.getCanViewUsers();
+        if (canViewUsers != null && !canViewUsers.isEmpty()) {
+            set(obj, canViewUsers, "can_view");
+        }
+
+        String userPath = file.getUserPath();
+        if (!userPath.equals(file.getRealPath())) {
+            set(obj, userPath, "user_path");
+        }
 
         file.getBaseVersion().ifPresent(bv -> set(obj, bv, "version_base"));
 

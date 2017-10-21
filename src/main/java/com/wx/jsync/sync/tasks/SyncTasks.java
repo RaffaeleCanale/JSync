@@ -2,6 +2,7 @@ package com.wx.jsync.sync.tasks;
 
 import com.wx.jsync.filesystem.FileStat;
 import com.wx.jsync.sync.SyncFile;
+import com.wx.jsync.sync.SyncFileBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ public class SyncTasks {
         if (!tasks.isEmpty()) {
             report.append(title);
             for (SyncTask task : tasks) {
-                report.append("\n - ").append(task.getPath());
+                report.append("\n - ").append(task.getUserPath());
             }
             report.append("\n\n");
         }
@@ -78,11 +79,11 @@ public class SyncTasks {
         }
 
         public void put(SyncTask.Type type, SyncFile localFile, SyncFile remoteFile) {
-            String path = localFile == null ? remoteFile.getPath() : localFile.getPath();
-            SyncTask oldValue = tasks.put(path, new SyncTask(type, localFile, remoteFile));
+            String userPath = localFile == null ? remoteFile.getUserPath() : localFile.getUserPath();
+            SyncTask oldValue = tasks.put(userPath, new SyncTask(type, localFile, remoteFile));
 
             if (oldValue != null) {
-                throw new IllegalArgumentException("A task was already setValue for " + path);
+                throw new IllegalArgumentException("A task was already setValue for " + userPath);
             }
         }
 
@@ -130,13 +131,9 @@ public class SyncTasks {
                     put(SOFT_PULL, localFile.get(), remoteFile);
                 }
             } else {
-                put(SOFT_PULL, new SyncFile(
-                        remoteFile.getPath(),
-                        FileStat.REMOVED,
-                        0.0,
-                        "",
-                        Optional.empty()
-                ), remoteFile);
+                put(SOFT_PULL, new SyncFileBuilder(remoteFile.getUserPath())
+                        .setStat(FileStat.REMOVED)
+                        .create(), remoteFile);
             }
         }
 

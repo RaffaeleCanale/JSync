@@ -102,7 +102,19 @@ public class GDriveFileSystem implements FileSystem {
 
     @Override
     public void move(String filename, String destination) throws IOException {
-        // TODO: 24.09.17
+        ensureHasList();
+
+        String id = idBuffer.get(filename);
+        if (id == null) {
+            throw new FileNotFoundException(filename);
+        }
+
+        Path path = new Path(destination);
+        String parentId = mkdirs(path.getParent());
+
+        idBuffer.put(path.getParent(), parentId);
+
+        drive.moveFile(id, parentId, path.getName());
     }
 
     @Override

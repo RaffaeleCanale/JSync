@@ -41,7 +41,7 @@ public class Index {
             Collection<SyncFile> files = get(FILES);
             Predicate<String> fileFilter = get(IGNORE);
             for (SyncFile file : files) {
-                if (!fileFilter.test(file.getPath())) {
+                if (!fileFilter.test(file.getUserPath())) {
                     removeSingle(FILES, file);
                 }
             }
@@ -54,24 +54,6 @@ public class Index {
         ByteArrayInputStream in = new ByteArrayInputStream(root.toString(4).getBytes("UTF-8"));
         fileSystem.write(INDEX_FILE, in);
     }
-
-
-//    public void setValue(IndexKey key, NamedOptions<?> options) {
-//        JSONObject value = NamedOptionsLoader.create(options);
-//        JsonUtils.setValue(root, value, key.getPrefix());
-//    }
-
-//    public void setValue(IndexKey key, Collection<?> value) {
-//        JsonUtils.setValue(root, value, key.getPrefix());
-//    }
-//
-//    public void setValue(IndexKey key, Object value) {
-//        JsonUtils.setValue(root, value, key.getPrefix());
-//    }
-//
-//    public String getString(IndexKey key) {
-//        return JsonUtils.getString(root, key.getPrefix());
-//    }
 
     public void userSet(IndexKey key, ArgumentsSupplier args) {
         key.getLoader().userSet(root, args, key.getPath());

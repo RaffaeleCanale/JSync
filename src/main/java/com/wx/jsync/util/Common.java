@@ -9,9 +9,12 @@ import com.wx.util.representables.string.EnumCasterLC;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.wx.jsync.Constants.VERSION_INCREMENT_DELTA;
 
@@ -43,6 +46,12 @@ public class Common {
 
     public static double bumpVersion(double version) {
         return roundToTwoPlaces(version + VERSION_INCREMENT_DELTA);
+    }
+
+    public static <E> Collection<E> filter(Collection<E> collection, Predicate<E> acceptPredicate) {
+        return collection.stream()
+                .filter(acceptPredicate)
+                .collect(Collectors.toList());
     }
 
     public static double roundToTwoPlaces(double value) {

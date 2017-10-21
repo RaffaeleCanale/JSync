@@ -18,6 +18,10 @@ public class Options {
         this.options = safe(options);
     }
 
+    public boolean has(String key) {
+        return options.containsKey(key);
+    }
+
     public <E> E get(String key) {
         return (E) options.get(key);
     }
